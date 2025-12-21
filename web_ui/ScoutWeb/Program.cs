@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using ScoutWeb.Models;
+using ScoutWeb.Repositories;
+using ScoutWeb.Services;
+using ScoutWeb.BusinessLogic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Bu satır olmadan "Unable to resolve service ScoutDbContext" hatası alırsın.
 builder.Services.AddDbContext<ScoutDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
+    builder.Services.AddScoped<IPlayerService, PlayerService>();
+    builder.Services.AddScoped<IValidationService, ValidationService>();
 
 // --- 2. GİRİŞ SİSTEMİ (Hata 1'in Çözümü) ---
 // Bu satır olmadan "No sign-in authentication handlers" hatası alırsın.

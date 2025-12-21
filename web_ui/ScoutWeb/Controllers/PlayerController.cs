@@ -6,6 +6,9 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Grpc.Net.Client;
 using ScoutGrpcService;
+using ScoutWeb.Services;
+using ScoutWeb.Repositories;
+using ScoutWeb.BusinessLogic;
 
 namespace ScoutWeb.Controllers
 {
@@ -13,30 +16,24 @@ namespace ScoutWeb.Controllers
     public class PlayerController : Controller
     {
         private readonly ScoutDbContext _context;
+        private readonly IPlayerService _playerService;
+        private readonly IValidationService _validationService;
 
-        public PlayerController(ScoutDbContext context)
+        public PlayerController(
+            ScoutDbContext context,
+            IPlayerService playerService,
+            IValidationService validationService)
         {
             _context = context;
+            _playerService = playerService;
+            _validationService = validationService;
         }
 
         // --- 1. LİSTELEME VE ARAMA SAYFASI ---
         public async Task<IActionResult> Index(string searchString)
         {
-            var playersQuery = _context.Players.Include(p => p.Team).AsQueryable();
-
-            if (!string.IsNullOrEmpty(searchString))
-            {
-                playersQuery = playersQuery.Where(p => 
-                    p.FullName != null && 
-                    p.FullName.ToLower().Contains(searchString.ToLower())
-                );
-            }
-
-            var players = await playersQuery
-                .OrderByDescending(p => p.CurrentMarketValue)
-                .Take(100)
-                .ToListAsync();
-
+            // Servis katmanını kullan
+            var players = await _playerService.GetPlayersAsync(searchString);
             return View(players);
         }
 
@@ -45,10 +42,8 @@ namespace ScoutWeb.Controllers
         {
             if (id == null) return NotFound();
 
-            var player = await _context.Players
-                .Include(p => p.Team)
-                .Include(p => p.Playerstats) 
-                .FirstOrDefaultAsync(m => m.PlayerId == id);
+            // Servis katmanını kullan
+            var player = await _playerService.GetPlayerDetailsAsync(id.Value);
 
             if (player == null) return NotFound();
 
@@ -64,37 +59,23 @@ namespace ScoutWeb.Controllers
 
         // --- 4. YENİ OYUNCU KAYDETME ---
         [HttpPost]
-        [ValidateAntiForgeryToken]
+[ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Player player, string? NewTeamName)
         {
-            if ((player.TeamId == null || player.TeamId == 0) && !string.IsNullOrEmpty(NewTeamName))
+            // Validation Service kullan
+            if (!_validationService.ValidatePlayer(player, out string errorMessage))
             {
-                var existingTeam = await _context.Teams
-                    .FirstOrDefaultAsync(t => t.TeamName.ToLower() == NewTeamName.ToLower());
-
-                if (existingTeam != null)
-                {
-                    player.TeamId = existingTeam.TeamId;
-                }
-                else
-                {
-                    var newTeam = new Team
-                    {
-                        TeamName = NewTeamName,
-                        LeagueName = "Diğer"
-                    };
-                    _context.Add(newTeam);
-                    await _context.SaveChangesAsync();
-                    player.TeamId = newTeam.TeamId;
-                }
-                
-                ModelState.Remove("TeamId");
+                ModelState.AddModelError("", errorMessage);
+                ViewBag.Teams = _context.Teams.ToList();
+                return View(player);
             }
+
+            ModelState.Remove("TeamId");
 
             if (ModelState.IsValid)
             {
-                _context.Add(player);
-                await _context.SaveChangesAsync();
+                // Servis katmanını kullan
+                await _playerService.CreatePlayerAsync(player, NewTeamName);
                 return RedirectToAction(nameof(Index));
             }
             
