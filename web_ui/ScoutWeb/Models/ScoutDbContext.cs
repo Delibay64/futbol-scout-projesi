@@ -28,6 +28,13 @@ public partial class ScoutDbContext : DbContext
     public virtual DbSet<PlayerDetailReport> PlayerReports { get; set; }
     public virtual DbSet<TopScorerReport> ScorerReports { get; set; }
 
+    // --- 3. VERİTABANI VIEW'LARI (PostgreSQL'deki VIEW'lar) ---
+    public virtual DbSet<PlayerDetailsTRView> VwPlayerDetailsTR { get; set; }
+    public virtual DbSet<TopScorerView> VwTopScorers { get; set; }
+    public virtual DbSet<YoungTalentView> VwYoungTalents { get; set; }
+    public virtual DbSet<TeamSummaryView> VwTeamSummary { get; set; }
+    public virtual DbSet<ScoutSummaryView> VwScoutSummary { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseNpgsql("Host=localhost;Database=ScoutDB;Username=postgres;Password=admin"); 
 
@@ -129,11 +136,11 @@ public partial class ScoutDbContext : DbContext
         });
 
         // --- 3. YENİ EKLENEN VIEW AYARLARI (Metodun en altına ekledik) ---
-        
+
         // Rapor 1: Oyuncu Detayları View
         modelBuilder.Entity<PlayerDetailReport>(entity =>
         {
-            entity.HasNoKey(); 
+            entity.HasNoKey();
             entity.ToView("vw_playerdetailstr");
         });
 
@@ -142,6 +149,43 @@ public partial class ScoutDbContext : DbContext
         {
             entity.HasNoKey();
             entity.ToView("vw_topscorers");
+        });
+
+        // --- 4. POSTGRESQL VERİTABANI VIEW'LARI ---
+
+        // VIEW: vw_PlayerDetailsTR (TL cinsinden oyuncu değerleri)
+        modelBuilder.Entity<PlayerDetailsTRView>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("vw_playerdetailstr");
+        });
+
+        // VIEW: vw_TopScorers (Gol krallığı)
+        modelBuilder.Entity<TopScorerView>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("vw_topscorers");
+        });
+
+        // VIEW: vw_YoungTalents (Genç yetenekler)
+        modelBuilder.Entity<YoungTalentView>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("vw_youngtalents");
+        });
+
+        // VIEW: vw_TeamSummary (Takım özeti)
+        modelBuilder.Entity<TeamSummaryView>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("vw_teamsummary");
+        });
+
+        // VIEW: vw_ScoutSummary (Scout rapor özeti)
+        modelBuilder.Entity<ScoutSummaryView>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("vw_scoutsummary");
         });
 
         OnModelCreatingPartial(modelBuilder);

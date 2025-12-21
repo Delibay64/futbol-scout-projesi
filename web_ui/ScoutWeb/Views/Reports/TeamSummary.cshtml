@@ -1,0 +1,38 @@
+@model IEnumerable<ScoutWeb.Models.TeamSummaryView>
+
+@{
+    ViewData["Title"] = "Takım Özeti";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-shield-fill text-primary"></i> Takım Özeti</h2>
+    <p class="text-muted">
+        <i class="bi bi-database"></i> Veri Kaynağı: <code>vw_TeamSummary</code> PostgreSQL View
+    </p>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Takım</th>
+                    <th>Oyuncu Sayısı</th>
+                    <th>Ortalama Yaş</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><strong><i class="bi bi-shield"></i> @item.TeamName</strong></td>
+                        <td><span class="badge bg-primary">@item.PlayerCount</span></td>
+                        <td>@item.AverageAge?.ToString("F1")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <a href="/Reports/AdminDashboard" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Geri Dön
+    </a>
+</div>

@@ -1,5 +1,48 @@
 @model IEnumerable<ScoutWeb.Models.Player>
 
+@if (User.IsInRole("Admin"))
+{
+    <div class="card mb-3">
+        <div class="card-header bg-dark text-white">
+            <i class="bi bi-gear-fill"></i> Stored Procedure İşlemleri
+        </div>
+        <div class="card-body">
+            <form method="post" action="/Player/BulkUpdateValues" class="row g-3" onsubmit="return confirm('Tüm oyuncu değerlerini güncellemek istediğinizden emin misiniz?');">
+                @Html.AntiForgeryToken()
+                <div class="col-auto">
+                    <label class="form-label">Toplu Değer Güncelleme (sp_UpdateValue):</label>
+                </div>
+                <div class="col-auto">
+                    <input type="number" name="percentage" class="form-control" value="10" min="-50" max="50" />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-arrow-up-circle"></i> %Güncelle
+                    </button>
+                </div>
+                <div class="col-auto">
+                    <small class="text-muted">Örn: 10 = %10 artış, -5 = %5 düşüş</small>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 @{
     ViewData["Title"] = "Futbolcu Listesi";
 }

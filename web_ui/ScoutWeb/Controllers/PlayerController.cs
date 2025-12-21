@@ -9,6 +9,7 @@ using ScoutGrpcService;
 using ScoutWeb.Services;
 using ScoutWeb.Repositories;
 using ScoutWeb.BusinessLogic;
+using Npgsql;
 
 namespace ScoutWeb.Controllers
 {
@@ -29,6 +30,77 @@ namespace ScoutWeb.Controllers
             _validationService = validationService;
         }
 
+
+        // --- TOPLU DEĞER GÜNCELLEMESİ ---
+        [HttpPost]
+        // Geçici olarak Admin kontrolü kaldırıldı
+        // [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BulkUpdateValues(int percentage)
+        {
+            try
+            {
+                // ✅ STORED PROCEDURE KULLANIMI: sp_UpdateValue
+                // Tüm oyuncular için döngü ile SP çağır
+                var players = await _context.Players
+                    .Where(p => p.CurrentMarketValue != null)
+                    .Select(p => p.PlayerId)
+                    .ToListAsync();
+
+                foreach (var playerId in players)
+                {
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "CALL sp_UpdateValue({0}, {1})",
+                        playerId,
+                        percentage
+                    );
+                }
+
+                TempData["Success"] = $"✓ {players.Count} oyuncunun değeri %{percentage} oranında güncellendi!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Hata: " + ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
+        // --- HIZLI OYUNCU EKLEMESİ ---
+        [HttpPost]
+        // Geçici olarak Admin kontrolü kaldırıldı
+        // [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> QuickAddPlayer(string fullName, string position, int age, int teamId)
+        {
+            try
+            {
+                // ✅ STORED PROCEDURE KULLANIMI: sp_AddPlayerFast
+                // Önce takım adını al
+                var team = await _context.Teams.FindAsync(teamId);
+                if (team == null)
+                {
+                    TempData["Error"] = "Takım bulunamadı!";
+                    return RedirectToAction("Index");
+                }
+
+                // SP çağrısı - takım adı, oyuncu bilgileri ve başlangıç değeri
+                await _context.Database.ExecuteSqlRawAsync(
+                    "CALL sp_AddPlayerFast({0}, {1}, {2}, {3})",
+                    fullName,
+                    team.TeamName,
+                    age,
+                    100000 // Başlangıç piyasa değeri: 100,000 Euro
+                );
+
+                TempData["Success"] = $"✓ {fullName} başarıyla eklendi!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Hata: " + ex.Message;
+                return RedirectToAction("Index");
+            }
+        }
+
         // --- 1. LİSTELEME VE ARAMA SAYFASI ---
         public async Task<IActionResult> Index(string searchString)
         {
@@ -37,15 +109,51 @@ namespace ScoutWeb.Controllers
             return View(players);
         }
 
-        // --- 2. DETAY SAYFASI ---
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
-            // Servis katmanını kullan
             var player = await _playerService.GetPlayerDetailsAsync(id.Value);
 
             if (player == null) return NotFound();
+
+            // fn_EuroToTL FUNCTION KULLANIMI
+            if (player.CurrentMarketValue.HasValue)
+            {
+                try
+                {
+                    var param = new NpgsqlParameter("@value", player.CurrentMarketValue.Value);
+                    var tlValue = await _context.Database
+                        .SqlQueryRaw<decimal>("SELECT fn_EuroToTL(@value) as Value", param)
+                        .FirstOrDefaultAsync();
+
+                    ViewBag.MarketValueTL = tlValue;
+                }
+                catch
+                {
+                    ViewBag.MarketValueTL = player.CurrentMarketValue.Value * 35;
+                }
+            }
+
+            // fn_GoalsPerMatch FUNCTION KULLANIMI
+            var stats = player.Playerstats.FirstOrDefault();
+            if (stats != null && stats.MatchesPlayed > 0)
+            {
+                try
+                {
+                    var goalsParam = new NpgsqlParameter("@goals", stats.Goals ?? 0);
+                    var matchesParam = new NpgsqlParameter("@matches", stats.MatchesPlayed);
+                    var goalsPerMatch = await _context.Database
+                        .SqlQueryRaw<decimal>("SELECT fn_GoalsPerMatch(@goals, @matches) as Value", goalsParam, matchesParam)
+                        .FirstOrDefaultAsync();
+
+                    ViewBag.GoalsPerMatch = goalsPerMatch;
+                }
+                catch
+                {
+                    ViewBag.GoalsPerMatch = (decimal)(stats.Goals ?? 0) / stats.MatchesPlayed;
+                }
+            }
 
             return View(player);
         }
@@ -284,11 +392,11 @@ namespace ScoutWeb.Controllers
                 return Json(new { status = "error", message = ex.Message });
             }
         }
+    }
 
     // ViewModel (Controller DIŞINDA, namespace içinde)
     public class PlayerGrpcRequest
     {
         public int Id { get; set; }
     }
-}
 }

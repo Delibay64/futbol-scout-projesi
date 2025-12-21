@@ -1,0 +1,44 @@
+@model IEnumerable<ScoutWeb.Models.PlayerDetailsTRView>
+
+@{
+    ViewData["Title"] = "Oyuncular (TL)";
+}
+
+<div class="container mt-4">
+    <h2><i class="bi bi-currency-exchange text-info"></i> Oyuncu Değerleri (Türk Lirası)</h2>
+    <p class="text-muted">
+        <i class="bi bi-database"></i> Veri Kaynağı: <code>vw_PlayerDetailsTR</code> View + <code>fn_EuroToTL()</code> Function
+    </p>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Oyuncu</th>
+                    <th>Pozisyon</th>
+                    <th>Yaş</th>
+                    <th>Takım</th>
+                    <th>Euro</th>
+                    <th>TL (fn_EuroToTL)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><strong>@item.FullName</strong></td>
+                        <td><span class="badge bg-secondary">@item.Position</span></td>
+                        <td>@item.Age</td>
+                        <td>@item.TeamName</td>
+                        <td><span class="badge bg-success">€@item.EuroValue?.ToString("N0")</span></td>
+                        <td><span class="badge bg-info">₺@item.TLValue?.ToString("N0")</span></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <a href="/Reports/AdminDashboard" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Geri Dön
+    </a>
+</div>
