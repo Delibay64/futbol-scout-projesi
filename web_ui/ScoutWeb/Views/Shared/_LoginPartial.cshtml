@@ -1,0 +1,23 @@
+@using Microsoft.AspNetCore.Identity
+
+<ul class="navbar-nav">
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <li class="nav-item d-flex align-items-center me-3">
+            <span class="text-white-50 small me-1">Kullanıcı:</span>
+            <span class="text-warning fw-bold">@User.Identity.Name</span>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-outline-light btn-sm" asp-controller="Account" asp-action="Logout">Çıkış Yap</a>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="btn btn-outline-warning btn-sm me-2" asp-controller="Account" asp-action="Login">Giriş Yap</a>
+        </li>
+        <li class="nav-item">
+            <a class="btn btn-warning btn-sm" asp-controller="Account" asp-action="Register">Kayıt Ol</a>
+        </li>
+    }
+</ul>

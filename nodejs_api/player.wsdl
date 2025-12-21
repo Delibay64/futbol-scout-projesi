@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="PlayerService"
+             targetNamespace="http://localhost:3000/wsdl"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:tns="http://localhost:3000/wsdl"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <message name="GetPlayerRequest">
+    <part name="playerId" type="xsd:int"/>
+  </message>
+
+  <message name="GetPlayerResponse">
+    <part name="fullName" type="xsd:string"/>
+    <part name="position" type="xsd:string"/>
+    <part name="age" type="xsd:int"/>
+    <part name="marketValue" type="xsd:string"/>
+  </message>
+
+  <portType name="PlayerPortType">
+    <operation name="GetPlayer">
+      <input message="tns:GetPlayerRequest"/>
+      <output message="tns:GetPlayerResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="PlayerBinding" type="tns:PlayerPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetPlayer">
+      <soap:operation soapAction="GetPlayer"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="PlayerService">
+    <documentation>Player SOAP Service</documentation>
+    <port name="PlayerPort" binding="tns:PlayerBinding">
+      <soap:address location="http://localhost:3000/soap"/>
+    </port>
+  </service>
+</definitions>

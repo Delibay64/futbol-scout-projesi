@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option csharp_namespace = "ScoutGrpcService";
+
+package player;
+
+// Oyuncu Servisi
+service PlayerService {
+  // Oyuncu bilgisi al
+  rpc GetPlayer (PlayerRequest) returns (PlayerResponse);
+  
+  // ML ile tahmin yap
+  rpc PredictValue (PredictionRequest) returns (PredictionResponse);
+}
+
+// İstek mesajları
+message PlayerRequest {
+  int32 player_id = 1;
+}
+
+message PredictionRequest {
+  int32 player_id = 2;
+  int32 goals = 3;
+  int32 assists = 4;
+  int32 matches = 5;
+  int32 age = 6;
+}
+
+// Cevap mesajları
+message PlayerResponse {
+  int32 player_id = 1;
+  string full_name = 2;
+  string position = 3;
+  int32 age = 4;
+  double market_value = 5;
+  string team_name = 6;
+}
+
+message PredictionResponse {
+  double predicted_value = 1;
+  string status = 2;
+  string message = 3;
+}

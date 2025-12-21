@@ -1,0 +1,59 @@
+/* GENEL SAYFA ARKA PLANI */
+body {
+    background-color: #f4f6f9; /* Hafif gri/buz mavisi (Profesyonel durur) */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #495057;
+}
+
+/* HEADER (MENÜ) AYARI */
+header {
+    margin-bottom: 2rem;
+}
+
+/* LİSTELEME TABLOSU İÇİN ÖZEL TASARIM */
+/* Tabloyu bir kart gibi gösterelim */
+.table {
+    background-color: #ffffff; /* Tablo bembeyaz olsun */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Arkasına hafif gölge atalım */
+    border-radius: 12px; /* Köşeleri yuvarlayalım */
+    overflow: hidden; /* Köşelerin düzgün görünmesi için */
+    margin-top: 1rem;
+}
+
+/* Tablo Başlığı (Koyu Lacivert - Futbol Temasına Uygun) */
+.table thead {
+    background-color: #212529; 
+    color: #ffffff;
+}
+
+/* Tablo Satırları (Üzerine gelince renk değişsin) */
+.table-hover tbody tr:hover {
+    background-color: #e2e6ea;
+    transition: 0.3s;
+}
+
+/* BUTONLAR */
+.btn {
+    border-radius: 50px; /* Butonları daha modern (yuvarlak) yapalım */
+}
+
+/* --- FOOTER DÜZELTME --- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  /* Footer'ın yüksekliği kadar alttan boşluk bırakıyoruz ki içerik footer'ın altına girmesin */
+  margin-bottom: 60px; 
+}
+
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px; /* Dikey ortalama */
+  background-color: #f8f9fa; /* Hafif gri arka plan */
+  z-index: 10; /* En üstte görünsün ama içeriği ezmesin */
+}

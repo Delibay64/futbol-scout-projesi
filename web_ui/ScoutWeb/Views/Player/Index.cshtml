@@ -1,0 +1,72 @@
+@model IEnumerable<ScoutWeb.Models.Player>
+
+@{
+    ViewData["Title"] = "Futbolcu Listesi";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary mb-0">🏆 Futbolcu Listesi</h2>
+            <p class="text-muted mb-0">Sistemdeki kayıtlı oyuncular</p>
+        </div>
+        <div>
+            <a asp-controller="Reports" asp-action="TopScorers" class="btn btn-warning text-dark fw-bold me-2">
+                <i class="bi bi-trophy-fill"></i> 🏆 Gol Krallığı
+            </a>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Yeni Oyuncu
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 border-0">
+        <div class="card-body bg-light rounded">
+            <form asp-controller="Players" asp-action="Index" method="get">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="bi bi-search text-muted"></i>
+                    </span>
+                    <input type="text" name="searchString" class="form-control border-start-0" placeholder="Futbolcu adı, takım veya pozisyon ara...">
+                    <button class="btn btn-primary px-4" type="submit">Ara</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Temizle</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-striped table-hover mb-0 align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ad Soyad</th>
+                    <th>Mevki</th>
+                    <th>Yaş</th>
+                    <th>Takım</th>
+                    <th>Piyasa Değeri (€)</th>
+                    <th class="text-end">İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">@item.FullName</td>
+                        <td><span class="badge bg-secondary">@item.Position</span></td>
+                        <td>@item.Age</td>
+                        <td>@(item.Team != null ? item.Team.TeamName : "-")</td>
+                        <td class="text-success fw-bold">@String.Format("{0:N0}", item.CurrentMarketValue) €</td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@item.PlayerId" class="btn btn-sm btn-info text-white me-1">
+                                <i class="bi bi-eye"></i> Detay
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.PlayerId" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i> Sil
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

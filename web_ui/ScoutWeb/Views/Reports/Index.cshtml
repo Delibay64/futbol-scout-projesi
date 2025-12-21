@@ -1,0 +1,145 @@
+@model List<ScoutWeb.Models.PlayerDetailReport>
+
+@{
+    ViewData["Title"] = "Yönetici Raporları";
+    // Controller'dan ViewBag ile gelen golcü listesini yakalıyoruz
+    var scorers = ViewBag.TopScorers as List<ScoutWeb.Models.TopScorerReport>;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">📊 Yönetici ve Analiz Paneli</h2>
+        <span class="badge bg-secondary">SQL View & Stored Procedure Demo</span>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success shadow-sm">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Message"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger shadow-sm">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-12 mb-5">
+            <div class="card shadow border-0">
+                <div class="card-header bg-dark text-white d-flex justify-content-between">
+                    <h5 class="mb-0">🌍 Oyuncu Değerleri ve Kur Çeviri</h5>
+                    <small class="text-warning">Kaynak: SQL View + Function</small>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Ad Soyad</th>
+                                    <th>Takım</th>
+                                    <th>Pozisyon</th>
+                                    <th>Yaş</th>
+                                    <th>Değer (€)</th>
+                                    <th>Değer (TL) <span class="badge bg-success">Hesaplandı</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Count > 0)
+                                {
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">@item.FullName</td>
+                                            <td>@item.TeamName</td>
+                                            <td>@item.Position</td>
+                                            <td>@item.Age</td>
+                                            <td>€@item.EuroValue.ToString("N0")</td>
+                                            <td class="text-success fw-bold">₺@item.TLValue.ToString("N0")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Veri bulunamadı.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">⚽ Gol Krallığı</h5>
+                    <small>İstatistikler</small>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        @if (scorers != null && scorers.Count > 0)
+                        {
+                            foreach (var s in scorers)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <strong>@s.FullName</strong>
+                                        <div class="text-muted small">Asist: @s.Assists</div>
+                                    </span>
+                                    <div class="text-end">
+                                        <span class="badge bg-primary rounded-pill mb-1">@s.Goals Gol</span><br/>
+                                        <span class="badge bg-light text-dark border">Ort: @s.GoalsPerMatch.ToString("0.00")</span>
+                                    </div>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item text-center">Gol istatistiği yok.</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">⚡ Yönetici İşlemi: Zam Yap</h5>
+                    <small>Stored Procedure Çalıştırır</small>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">Bu işlem, seçilen oyuncunun piyasa değerini veritabanı seviyesinde kalıcı olarak günceller.</p>
+                    
+                    <form asp-controller="Reports" asp-action="ApplyRaise" method="post">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Oyuncu ID</label>
+                            <input type="number" name="playerId" class="form-control" required placeholder="Örn: 10" />
+                            <div class="form-text">Oyuncunun ID numarasını giriniz.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Zam Oranı (%)</label>
+                            <div class="input-group">
+                                <input type="number" name="percentage" class="form-control" value="10" required />
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-dark">
+                                <i class="bi bi-cash-coin"></i> Değeri Güncelle (SP Çalıştır)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

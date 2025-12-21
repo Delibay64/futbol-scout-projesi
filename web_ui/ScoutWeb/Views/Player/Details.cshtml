@@ -1,0 +1,137 @@
+@model ScoutWeb.Models.Player
+
+@{
+    ViewData["Title"] = "Oyuncu Kartı";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="mb-0">⚽ @Model.FullName</h3>
+                <small>@Model.Position - @(Model.Team?.TeamName)</small>
+            </div>
+            <span class="badge bg-light text-primary fs-6">ID: @Model.PlayerId</span>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="text-secondary border-bottom pb-2">📌 Kimlik ve Finans</h5>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Yaş:</strong> <span>@Model.Age</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <strong>Uyruk:</strong> <span>@Model.Nationality</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <strong>Piyasa Değeri (€):</strong> 
+                            <span class="badge bg-success fs-6">@String.Format("{0:N0}", Model.CurrentMarketValue) €</span>
+                        </li>
+                    </ul>
+
+                    <div class="alert alert-success d-flex align-items-center">
+                        <i class="bi bi-currency-exchange fs-2 me-3"></i>
+                        <div>
+                            <small class="text-muted">Tahmini TL Karşılığı (Kur: 40)</small><br/>
+                            <strong class="fs-4">₺@((Model.CurrentMarketValue * 40m)?.ToString("N0"))</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 text-center border-start">
+                    <h5 class="text-secondary border-bottom pb-2">🤖 Yapay Zeka Analizi</h5>
+                
+                    <div id="predictionResult" class="alert alert-warning mt-3">
+                        Henüz tahmin yapılmadı.
+                    </div>
+                    
+                    <button id="btnPredict" class="btn btn-outline-primary btn-lg mt-2 w-100" onclick="makePrediction()">
+                        <i class="bi bi-robot"></i> AI Tahmini Yap
+                    </button>
+                    <small class="text-muted d-block mt-2">Makine öğrenmesi modeli kullanılarak hesaplanır.</small>
+                </div>
+            </div>
+
+            <hr class="my-4">
+            @if (User.IsInRole("Admin"))
+            {
+            <div class="card border-warning bg-light">
+                <div class="card-body d-flex align-items-center justify-content-between flex-wrap">
+                    <div>
+                        <h5 class="card-title text-warning text-dark fw-bold">
+                            <i class="bi bi-sliders"></i> Değer Yönetimi
+                        </h5>
+                        <p class="card-text mb-0 small text-muted">
+                            Oyuncunun değerini güncelle. <br/>
+                            <span class="text-danger fw-bold">* İndirim için başına eksi (-) koyun. (Örn: -10)</span>
+                        </p>
+                    </div>
+                    
+                    <form asp-controller="Reports" asp-action="ApplyRaise" method="post" class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                        <input type="hidden" name="playerId" value="@Model.PlayerId" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                        
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold">%</span>
+                            <input type="number" name="percentage" class="form-control" style="width: 90px;" placeholder="10" required>
+                            <button type="submit" class="btn btn-dark">Güncelle</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            }
+            else
+            {
+                <div class="alert alert-secondary mt-3">
+                    <i class="bi bi-info-circle"></i> Fiyat güncelleme yetkiniz yok. Sadece görüntüleyebilirsiniz.
+                </div>
+            }
+        </div>
+        <div class="card-footer bg-white">
+            <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Listeye Dön</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function makePrediction() {
+            var btn = document.getElementById("btnPredict");
+            var resultBox = document.getElementById("predictionResult");
+            
+            // Butonu kilitle
+            btn.disabled = true;
+            btn.innerHTML = "⏳ Hesaplanıyor...";
+            
+            // Oyuncu ID'sini al
+            var playerId = @Model.PlayerId;
+
+            // İsteği gönder
+            fetch('/Player/PredictPrice?id=' + playerId, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    var deger = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'EUR' }).format(data.tahmini_deger);
+                    
+                    resultBox.className = "alert alert-success mt-3";
+                    resultBox.innerHTML = "<strong>🎯 Tahmini Değer:</strong> <br/>" + deger;
+                } else {
+                    resultBox.className = "alert alert-danger mt-3";
+                    resultBox.innerHTML = "Hata: " + (data.message || "Bilinmeyen hata");
+                }
+            })
+            .catch(error => {
+                resultBox.className = "alert alert-danger mt-3";
+                resultBox.innerHTML = "Bağlantı Hatası! Python servisi açık mı?";
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = "<i class='bi bi-robot'></i> Tekrar Tahmin Yap";
+            });
+        }
+    </script>
+}

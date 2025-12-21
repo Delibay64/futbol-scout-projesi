@@ -1,0 +1,43 @@
+# ASP.NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.csproj.user
+
+# Node.js
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.pkl
+*.db
+
+# Database
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Sensitive
+appsettings.json
+appsettings.Development.json
+*.config

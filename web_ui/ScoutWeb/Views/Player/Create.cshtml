@@ -1,0 +1,196 @@
+@model ScoutWeb.Models.Player
+
+@{
+    ViewData["Title"] = "Yeni Oyuncu Ekle";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">➕ Yeni Yetenek Ekle</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ad Soyad</label>
+                            <div class="input-group">
+                                <input asp-for="FullName" id="txtName" class="form-control" required placeholder="Örn: Cristiano Ronaldo" />
+                                <button type="button" id="btnFetch" class="btn btn-warning" onclick="fetchData()">
+                                    🌐 Verileri Çek
+                                </button>
+                            </div>
+                            <small class="text-muted">İsmi yazıp butona bas, bilgileri Transfermarkt'tan getirelim.</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Yaş</label>
+                                <input asp-for="Age" id="txtAge" type="number" class="form-control" required />
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mevki</label>
+                                <select asp-for="Position" id="txtPosition" class="form-select">
+                                    <option value="Forvet">Forvet</option>
+                                    <option value="Santrafor">Santrafor</option>
+                                    <option value="Merkez Ortasaha">Merkez Ortasaha</option>
+                                    <option value="Ofansif Ortasaha">Ofansif Ortasaha</option>
+                                    <option value="On Libero">On Libero</option>
+                                    <option value="Stoper">Stoper</option>
+                                    <option value="Sol Kanat">Sol Kanat</option>
+                                    <option value="Sag Kanat">Sag Kanat</option>
+                                    <option value="Sol Bek">Sol Bek</option>
+                                    <option value="Sag Bek">Sag Bek</option>
+                                    <option value="Kaleci">Kaleci</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Uyruk</label>
+                                <input asp-for="Nationality" id="txtNationality" class="form-control" placeholder="Örn: Portugal" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Takım</label>
+                                
+                                <select asp-for="TeamId" id="ddlTeams" class="form-select">
+                                    <option value="">-- Listeden Seç --</option>
+                                    @if (ViewBag.Teams != null)
+                                    {
+                                        foreach (var team in (List<ScoutWeb.Models.Team>)ViewBag.Teams)
+                                        {
+                                            <option value="@team.TeamId">@team.TeamName</option>
+                                        }
+                                    }
+                                </select>
+
+                                <input type="text" name="NewTeamName" id="txtNewTeam" class="form-control mt-2 border-warning" placeholder="Listede yoksa buraya yaz (Örn: Al Nassr)" />
+                                <small class="text-muted" id="teamInfoText">Listede yoksa yukarıya yazın, otomatik eklenir.</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Güncel Piyasa Değeri (€)</label>
+                            <input asp-for="CurrentMarketValue" id="txtValue" type="number" class="form-control" value="0" />
+                        </div>
+                        
+                        <input type="hidden" name="Playerstats[0].Goals" id="hdnGoals" value="0" />
+                        <input type="hidden" name="Playerstats[0].Assists" id="hdnAssists" value="0" />
+                        <input type="hidden" name="Playerstats[0].MatchesPlayed" id="hdnMatches" value="0" />
+                        <input type="hidden" name="Playerstats[0].MinutesPlayed" id="hdnMinutes" value="0" />
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">💾 Oyuncuyu Kaydet</button>
+                            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function fetchData() {
+            var nameInput = document.getElementById("txtName");
+            var name = nameInput.value;
+            var btn = document.getElementById("btnFetch");
+
+            if (!name) {
+                alert("⚠️ Lütfen önce bir isim yazın!");
+                return;
+            }
+
+            // Butonu kilitle
+            btn.disabled = true;
+            btn.innerHTML = "⏳ Aranıyor...";
+
+            // Fetch API ile Controller'a sor
+            fetch('/Player/FetchPlayerData?name=' + encodeURIComponent(name), {
+                method: 'POST'
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Sunucu hatası veya oyuncu bulunamadı.");
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log("Gelen Veri:", data);
+
+                    // 1. Kutuları Doldur
+                    document.getElementById("txtAge").value = data.Age;
+                    document.getElementById("txtNationality").value = data.Nationality;
+                    document.getElementById("txtValue").value = data.CurrentMarketValue;
+                    
+                    // İstatistikleri gizli alanlara yaz
+                    document.getElementById("hdnGoals").value = data.Goals;
+                    document.getElementById("hdnAssists").value = data.Assists;
+                    document.getElementById("hdnMatches").value = data.MatchesPlayed;
+                    document.getElementById("hdnMinutes").value = data.MinutesPlayed;
+
+                    // 2. Mevkiyi Seçmeye Çalış
+                    var positionSelect = document.getElementById("txtPosition");
+                    var foundPos = false;
+                    for (var i = 0; i < positionSelect.options.length; i++) {
+                        if (data.Position.toLowerCase().includes(positionSelect.options[i].text.toLowerCase())) {
+                            positionSelect.selectedIndex = i;
+                            foundPos = true;
+                            break;
+                        }
+                    }
+                    if(!foundPos) positionSelect.value = "Merkez Ortasaha"; // Bulamazsa varsayılan
+
+                    // 3. TAKIM SEÇME MANTIĞI (AL NASSR FIX)
+                    var teamSelect = document.getElementById("ddlTeams");
+                    var newTeamInput = document.getElementById("txtNewTeam");
+                    var infoText = document.getElementById("teamInfoText");
+                    
+                    var scraperTeamName = data.TeamName; // "Al Nassr FC"
+                    var foundTeam = false;
+
+                    // Listeyi gez
+                    for (var i = 0; i < teamSelect.options.length; i++) {
+                        if (teamSelect.options[i].text.toLowerCase().includes(scraperTeamName.toLowerCase())) {
+                            teamSelect.selectedIndex = i;
+                            foundTeam = true;
+                            newTeamInput.value = ""; 
+                            break;
+                        }
+                    }
+
+                    // Listede YOKSA
+                    if (!foundTeam) {
+                        teamSelect.value = ""; // Seçimi boşalt
+                        newTeamInput.value = scraperTeamName; // Kutuya yaz (Örn: Al Nassr FC)
+                        newTeamInput.style.backgroundColor = "#fff3cd"; // Sarı yap dikkat çeksin
+                        infoText.innerHTML = "⚠️ <b>" + scraperTeamName + "</b> listede yok, yeni olarak eklenecek!";
+                        infoText.className = "text-danger fw-bold";
+                    } else {
+                        newTeamInput.style.backgroundColor = "white";
+                        infoText.innerHTML = "✅ Takım listede bulundu.";
+                        infoText.className = "text-success";
+                    }
+
+                    alert("✅ Bilgiler Çekildi!\nGol: " + data.Goals + " | Asist: " + data.Assists);
+                    
+                } else {
+                    alert("❌ Hata: " + (data.message || "Bilinmeyen hata."));
+                }
+            })
+            .catch(error => {
+                console.error("Hata:", error);
+                alert("❌ Bağlantı Hatası: Python servisi (ai_service.py) açık mı?");
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = "🌐 Verileri Çek";
+            });
+        }
+    </script>
+}
