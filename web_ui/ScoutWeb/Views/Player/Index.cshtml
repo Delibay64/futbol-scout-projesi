@@ -103,9 +103,12 @@
                             <a asp-action="Details" asp-route-id="@item.PlayerId" class="btn btn-sm btn-info text-white me-1">
                                 <i class="bi bi-eye"></i> Detay
                             </a>
-                            <a asp-action="Delete" asp-route-id="@item.PlayerId" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i> Sil
-                            </a>
+                            <form asp-action="Delete" asp-route-id="@item.PlayerId" method="post" style="display:inline" onsubmit="return confirm('[@item.FullName] oyuncusunu silmek istediğinize emin misiniz?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i> Sil
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 }

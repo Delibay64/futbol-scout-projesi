@@ -1,8 +1,203 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Ana Sayfa - Futbol Scout Sistemi";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@*
+    HOME/INDEX VIEW: Ana sayfa
+    VIEWCOMPONENT KULLANIMI: TopScorersViewComponent ile dinamik içerik
+*@
+
+<div class="container-fluid py-4">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm bg-gradient bg-primary text-white">
+                <div class="card-body py-5 text-center">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="bi bi-trophy-fill"></i> Futbol Scout Sistemi
+                    </h1>
+                    <p class="lead mb-4">
+                        Oyuncu yeteneklerini keşfedin, istatistikleri analiz edin ve raporlarınızı oluşturun
+                    </p>
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a asp-controller="Player" asp-action="Index" class="btn btn-light btn-lg">
+                                <i class="bi bi-people"></i> Oyuncular
+                            </a>
+                            <a asp-controller="Teams" asp-action="Index" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-shield"></i> Takımlar
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-warning btn-lg">
+                                <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
+                            </a>
+                            <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-person-plus"></i> Kayıt Ol
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- İstatistikler ve ViewComponent -->
+    <div class="row">
+        <!-- Sol Kolon: Özellikler -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">
+                        <i class="bi bi-star-fill text-warning"></i> Sistem Özellikleri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="fw-bold">Oyuncu Yönetimi</h6>
+                                    <p class="text-muted small mb-0">
+                                        Oyuncu profilleri, istatistikler ve performans takibi
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-graph-up text-success" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="fw-bold">Detaylı İstatistikler</h6>
+                                    <p class="text-muted small mb-0">
+                                        Gol, asist, kart ve maç istatistikleri
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-file-earmark-text text-info" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="fw-bold">Scout Raporları</h6>
+                                    <p class="text-muted small mb-0">
+                                        Detaylı oyuncu değerlendirme raporları oluşturun
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-shield-fill text-warning" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="fw-bold">Takım Yönetimi</h6>
+                                    <p class="text-muted small mb-0">
+                                        Takım kadroları ve oyuncu transferleri
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-robot text-danger" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="fw-bold">AI Tahminleme</h6>
+                                    <p class="text-muted small mb-0">
+                                        Makine öğrenmesi ile oyuncu potansiyel analizi
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-lock-fill text-secondary" style="font-size: 2rem;"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="fw-bold">Güvenlik</h6>
+                                    <p class="text-muted small mb-0">
+                                        Rol bazlı erişim kontrolü ve veri güvenliği
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Kolon: VIEWCOMPONENT KULLANIMI -->
+        <div class="col-lg-4 mb-4">
+            @*
+                VIEWCOMPONENT KULLANIMI
+                TopScorersViewComponent ile en iyi 10 golcüyü dinamik olarak göster
+                count parametresi ile kaç oyuncu gösterileceğini belirtebilirsiniz
+            *@
+            @await Component.InvokeAsync("TopScorers", new { count = 10 })
+        </div>
+    </div>
+
+    <!-- Hızlı Linkler -->
+    @if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        <div class="row mt-4">
+            <div class="col-lg-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="mb-0">
+                            <i class="bi bi-lightning-fill text-warning"></i> Hızlı Erişim
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center g-3">
+                            <div class="col-md-3">
+                                <a asp-controller="Player" asp-action="Create" class="btn btn-outline-success w-100 py-3">
+                                    <i class="bi bi-person-plus-fill d-block mb-2" style="font-size: 2rem;"></i>
+                                    Yeni Oyuncu Ekle
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a asp-controller="Teams" asp-action="Create" class="btn btn-outline-primary w-100 py-3">
+                                    <i class="bi bi-shield-plus d-block mb-2" style="font-size: 2rem;"></i>
+                                    Yeni Takım Ekle
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a asp-controller="Player" asp-action="Index" class="btn btn-outline-info w-100 py-3">
+                                    <i class="bi bi-search d-block mb-2" style="font-size: 2rem;"></i>
+                                    Oyuncu Ara
+                                </a>
+                            </div>
+                            <div class="col-md-3">
+                                <a asp-controller="ScoutReport" asp-action="Index" class="btn btn-outline-warning w-100 py-3">
+                                    <i class="bi bi-file-earmark-text-fill d-block mb-2" style="font-size: 2rem;"></i>
+                                    Raporlarım
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 </div>

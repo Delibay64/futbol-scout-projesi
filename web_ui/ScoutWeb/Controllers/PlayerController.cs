@@ -508,6 +508,35 @@ namespace ScoutWeb.Controllers
                 return Json(new { status = "error", message = ex.Message });
             }
         }
+
+        // --- DELETE İŞLEMİ ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var player = await _context.Players.FindAsync(id);
+                if (player == null)
+                {
+                    TempData["Error"] = "Oyuncu bulunamadı!";
+                    return RedirectToAction("Index");
+                }
+
+                string playerName = player.FullName ?? "Bilinmeyen Oyuncu";
+
+                _context.Players.Remove(player);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = $"✓ {playerName} başarıyla silindi!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Silme işlemi başarısız: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
     }
 
     // ViewModel (Controller DIŞINDA, namespace içinde)

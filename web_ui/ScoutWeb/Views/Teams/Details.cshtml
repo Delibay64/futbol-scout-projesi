@@ -1,0 +1,234 @@
+@model ScoutWeb.Models.Team
+
+@{
+    ViewData["Title"] = $"{Model.TeamName} - Detaylar";
+}
+
+@*
+    TEAMS/DETAILS VIEW: Takım detayları ve oyuncu listesi
+    ViewData kullanımı: PlayerCount, TotalGoals, AverageAge
+    İlişkili verilerin gösterimi (Players ile OneToMany ilişki)
+*@
+
+<div class="container-fluid py-4">
+    <!-- Geri Dön Butonu -->
+    <div class="mb-3">
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Takımlara Dön
+        </a>
+    </div>
+
+    <!-- TempData Mesajları -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Sol Kolon: Takım Bilgileri -->
+        <div class="col-lg-4 mb-4">
+            <!-- Takım Genel Bilgiler -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-fill"></i> Takım Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-primary mb-3">@Model.TeamName</h3>
+
+                    <div class="mb-3">
+                        <label class="text-muted small">Ülke</label>
+                        <p class="mb-0 fw-bold">
+                            <i class="bi bi-globe"></i> @Model.Country
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="text-muted small">Lig</label>
+                        <p class="mb-0 fw-bold">
+                            <i class="bi bi-trophy"></i> @(Model.LeagueName ?? "Belirtilmemiş")
+                        </p>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.TeamId" class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Düzenle
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@Model.TeamId" method="post"
+                              onsubmit="return confirm('[@Model.TeamName] takımını silmek istediğinize emin misiniz?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger w-100">
+                                <i class="bi bi-trash"></i> Takımı Sil
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ViewData Kullanımı - Takım İstatistikleri -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-graph-up"></i> Takım İstatistikleri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="stat-item mb-3 p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Oyuncu Sayısı</small>
+                                <h4 class="mb-0 text-primary">@ViewData["PlayerCount"]</h4>
+                            </div>
+                            <i class="bi bi-people-fill text-primary" style="font-size: 2rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-item mb-3 p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Toplam Gol</small>
+                                <h4 class="mb-0 text-success">@ViewData["TotalGoals"]</h4>
+                            </div>
+                            <i class="bi bi-trophy-fill text-success" style="font-size: 2rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+
+                    <div class="stat-item p-3 bg-light rounded">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">Ortalama Yaş</small>
+                                <h4 class="mb-0 text-info">
+                                    @String.Format("{0:0.0}", ViewData["AverageAge"])
+                                </h4>
+                            </div>
+                            <i class="bi bi-calendar-check text-info" style="font-size: 2rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Kolon: Oyuncu Listesi -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people"></i> Takım Kadrosu
+                    </h5>
+                    <span class="badge bg-primary rounded-pill">
+                        @Model.Players.Count oyuncu
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Players != null && Model.Players.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Oyuncu Adı</th>
+                                        <th>Pozisyon</th>
+                                        <th>Yaş</th>
+                                        <th>Uyruk</th>
+                                        <th>Sezon Gol</th>
+                                        <th>Sezon Asist</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var player in Model.Players.OrderBy(p => p.FullName))
+                                    {
+                                        var latestStats = player.Playerstats.OrderByDescending(s => s.Season).FirstOrDefault();
+
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Player" asp-action="Details" asp-route-id="@player.PlayerId"
+                                                   class="text-decoration-none fw-bold">
+                                                    @player.FullName
+                                                </a>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@player.Position</span>
+                                            </td>
+                                            <td>
+                                                @if (player.Age.HasValue)
+                                                {
+                                                    <span class="badge bg-info">@player.Age yaş</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">@(player.Nationality ?? "-")</small>
+                                            </td>
+                                            <td>
+                                                @if (latestStats != null)
+                                                {
+                                                    <span class="badge bg-success">@(latestStats.Goals ?? 0)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (latestStats != null)
+                                                {
+                                                    <span class="badge bg-warning text-dark">@(latestStats.Assists ?? 0)</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <a asp-controller="Player" asp-action="Details" asp-route-id="@player.PlayerId"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> Detay
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="p-5 text-center">
+                            <i class="bi bi-inbox" style="font-size: 3rem; opacity: 0.3;"></i>
+                            <h5 class="text-muted mt-3">Bu takımda henüz oyuncu yok</h5>
+                            <p class="text-muted">
+                                Oyuncu eklemek için Player sayfasına gidin ve takım seçimini yapın
+                            </p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // TempData mesajlarını otomatik kapat
+        setTimeout(function() {
+            $('.alert').fadeOut('slow');
+        }, 5000);
+    </script>
+}
