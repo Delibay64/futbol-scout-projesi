@@ -230,6 +230,7 @@ namespace ScoutWeb.Controllers
             {
                 using (var client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(5); // 5 saniye timeout
                     var jsonContent = new StringContent(JsonSerializer.Serialize(inputData), Encoding.UTF8, "application/json");
                     var response = await client.PostAsync("http://localhost:5000/predict", jsonContent);
 
@@ -240,13 +241,35 @@ namespace ScoutWeb.Controllers
                     }
                     else
                     {
-                        return Json(new { status = "error", message = "AI servisine bağlanılamadı." });
+                        return Json(new {
+                            status = "error",
+                            message = "AI servisi yanıt vermedi. Python Flask servisi (localhost:5000) çalışmıyor olabilir.",
+                            hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın."
+                        });
                     }
                 }
             }
+            catch (HttpRequestException ex)
+            {
+                return Json(new {
+                    status = "error",
+                    message = "AI servisi erişilebilir değil. Python Flask servisi (localhost:5000) çalışmıyor.",
+                    hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın.",
+                    details = ex.Message
+                });
+            }
+            catch (TaskCanceledException ex)
+            {
+                return Json(new {
+                    status = "error",
+                    message = "AI servisi zaman aşımına uğradı (5 saniye).",
+                    hint = "Python Flask servisi çalışmıyor veya yanıt vermiyor.",
+                    details = ex.Message
+                });
+            }
             catch (Exception ex)
             {
-                return Json(new { status = "error", message = "Hata: " + ex.Message });
+                return Json(new { status = "error", message = "Beklenmeyen hata: " + ex.Message });
             }
         }
 
@@ -258,6 +281,7 @@ namespace ScoutWeb.Controllers
             {
                 using (var client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(10); // 10 saniye timeout (scraping daha uzun sürebilir)
                     var payload = new { name = name };
                     var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
@@ -270,13 +294,35 @@ namespace ScoutWeb.Controllers
                     }
                     else
                     {
-                        return Json(new { status = "error", message = "Python servisine ulaşılamadı veya oyuncu bulunamadı." });
+                        return Json(new {
+                            status = "error",
+                            message = "Veri çekme servisi yanıt vermedi. Python Flask servisi (localhost:5000) çalışmıyor olabilir.",
+                            hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın."
+                        });
                     }
                 }
             }
+            catch (HttpRequestException ex)
+            {
+                return Json(new {
+                    status = "error",
+                    message = "Veri çekme servisi erişilebilir değil. Python Flask servisi (localhost:5000) çalışmıyor.",
+                    hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın.",
+                    details = ex.Message
+                });
+            }
+            catch (TaskCanceledException ex)
+            {
+                return Json(new {
+                    status = "error",
+                    message = "Veri çekme servisi zaman aşımına uğradı (10 saniye).",
+                    hint = "Python Flask servisi çalışmıyor veya oyuncu bulunamadı.",
+                    details = ex.Message
+                });
+            }
             catch (Exception ex)
             {
-                return Json(new { status = "error", message = "Hata: " + ex.Message });
+                return Json(new { status = "error", message = "Beklenmeyen hata: " + ex.Message });
             }
         }
 

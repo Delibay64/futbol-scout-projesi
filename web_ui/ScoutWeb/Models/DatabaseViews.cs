@@ -19,10 +19,10 @@ namespace ScoutWeb.Models
         public string? TeamName { get; set; }
 
         [Column("eurovalue")]
-        public decimal? EuroValue { get; set; }
+        public double? EuroValue { get; set; }
 
         [Column("tlvalue")]
-        public decimal? TLValue { get; set; }
+        public double? TLValue { get; set; }
     }
 
     // VIEW: vw_TopScorers - Gol krallığı listesi
@@ -39,7 +39,7 @@ namespace ScoutWeb.Models
         public int? Assists { get; set; }
 
         [Column("goalspermatch")]
-        public decimal? GoalsPerMatch { get; set; }
+        public double? GoalsPerMatch { get; set; }
     }
 
     // VIEW: vw_YoungTalents - 21 yaş altı oyuncular
@@ -65,7 +65,7 @@ namespace ScoutWeb.Models
         public int? TeamId { get; set; }
 
         [Column("current_market_value")]
-        public decimal? CurrentMarketValue { get; set; }
+        public double? CurrentMarketValue { get; set; }
     }
 
     // VIEW: vw_TeamSummary - Takım istatistikleri
@@ -79,7 +79,7 @@ namespace ScoutWeb.Models
         public int? PlayerCount { get; set; }
 
         [Column("averageage")]
-        public decimal? AverageAge { get; set; }
+        public double? AverageAge { get; set; }
     }
 
     // VIEW: vw_ScoutSummary - Scout rapor özeti
