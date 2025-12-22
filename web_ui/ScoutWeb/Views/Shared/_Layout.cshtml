@@ -29,6 +29,12 @@
                             <a class="nav-link text-white" asp-controller="Player" asp-action="Index">Oyuncu Listesi</a>
                         </li>
 
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="Reports" asp-action="ScoutReport">
+                                <i class="bi bi-file-earmark-text"></i> Scout Raporları
+                            </a>
+                        </li>
+
                         @* Sadece "admin" kullanıcısı görebilir *@
                         @if (Context.Session.GetString("Username") == "admin")
                         {

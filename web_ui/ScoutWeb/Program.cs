@@ -4,6 +4,7 @@ using ScoutWeb.Models;
 using ScoutWeb.Repositories;
 using ScoutWeb.Services;
 using ScoutWeb.BusinessLogic;
+using ScoutWeb.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// --- CROSS-CUTTING CONCERNS (6. KATMAN - SOA) ---
+app.UseMiddleware<RequestLoggingMiddleware>(); // Tüm istekleri logla
+app.UseMiddleware<ResponseCachingMiddleware>(); // GET istekleri cache'le
 
 // --- SESSION'I AKTİF ET ---
 app.UseSession(); // Session kullanımı için gerekli

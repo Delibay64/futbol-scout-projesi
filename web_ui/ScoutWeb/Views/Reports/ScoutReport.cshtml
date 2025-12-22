@@ -1,0 +1,309 @@
+@model IEnumerable<ScoutWeb.Models.Scoutreport>
+
+@{
+    ViewData["Title"] = "Scout Raporları";
+    var isAdmin = ViewBag.IsAdmin ?? false;
+    var pendingReports = ViewBag.PendingReports as List<ScoutWeb.Models.Scoutreport> ?? new List<ScoutWeb.Models.Scoutreport>();
+    var approvedReports = ViewBag.ApprovedReports as List<ScoutWeb.Models.Scoutreport> ?? Model.Where(r => r.IsApproved).ToList();
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-text"></i> Scout Raporları</h2>
+        <a asp-controller="Player" asp-action="Index" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i> Oyuncu Listesine Dön
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @* ADMIN: ONAY BEKLEYEN RAPORLAR *@
+    @if (isAdmin && pendingReports.Any())
+    {
+        <div class="alert alert-warning">
+            <h4><i class="bi bi-hourglass-split"></i> Onay Bekleyen Raporlar (@pendingReports.Count)</h4>
+            <p class="mb-0">Aşağıdaki raporlar kullanıcılar tarafından eklendi ve onayınızı bekliyor.</p>
+        </div>
+
+        <div class="card shadow-sm mb-4 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <i class="bi bi-clock-history"></i> <strong>Onay Bekleyenler</strong>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Rapor ID</th>
+                                <th>Oyuncu</th>
+                                <th>Takım</th>
+                                <th>Tahmini Değer</th>
+                                <th>Scout</th>
+                                <th>Tarih</th>
+                                <th>Notlar</th>
+                                <th>İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var report in pendingReports)
+                            {
+                                <tr class="table-warning">
+                                    <td><span class="badge bg-warning text-dark">@report.ReportId</span></td>
+                                    <td>
+                                        <a asp-controller="Player" asp-action="Details" asp-route-id="@report.PlayerId"
+                                           class="text-decoration-none fw-bold">
+                                            @report.Player?.FullName
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (report.Player?.Team != null)
+                                        {
+                                            <span class="badge bg-info">@report.Player.Team.TeamName</span>
+                                        }
+                                    </td>
+                                    <td><strong class="text-success">@String.Format("{0:N0}", report.PredictedValue) €</strong></td>
+                                    <td><i class="bi bi-person-circle"></i> @report.User?.Username</td>
+                                    <td><small>@report.ReportDate?.ToString("dd.MM.yyyy HH:mm")</small></td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(report.Notes))
+                                        {
+                                            <span>@(report.Notes.Length > 30 ? report.Notes.Substring(0, 30) + "..." : report.Notes)</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <form method="post" style="display:inline;" asp-action="ApproveReport">
+                                            <input type="hidden" name="reportId" value="@report.ReportId" />
+                                            <button type="submit" class="btn btn-sm btn-success"
+                                                    onclick="return confirm('Bu raporu onaylamak istediğinize emin misiniz?')">
+                                                <i class="bi bi-check-circle"></i> Onayla
+                                            </button>
+                                        </form>
+                                        <form method="post" style="display:inline;" asp-action="RejectReport">
+                                            <input type="hidden" name="reportId" value="@report.ReportId" />
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Bu raporu reddetmek ve silmek istediğinize emin misiniz?')">
+                                                <i class="bi bi-x-circle"></i> Reddet
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    @* ONAYLI RAPORLAR *@
+    @if (isAdmin)
+    {
+        <h3 class="mt-4 mb-3"><i class="bi bi-check-circle-fill text-success"></i> Onaylanmış Raporlar</h3>
+    }
+
+    @if (!approvedReports.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> @(isAdmin ? "Henüz onaylanmış rapor yok." : "Henüz scout raporu oluşturulmamış.")
+            <br/>
+            <small>Oyuncu detay sayfasından "Scout Raporu Oluştur" butonuna tıklayarak rapor ekleyebilirsiniz.</small>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-clipboard-data"></i> @(isAdmin ? "Onaylanmış" : "Toplam") <strong>@approvedReports.Count</strong> rapor
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><i class="bi bi-hash"></i> Rapor ID</th>
+                                <th><i class="bi bi-person"></i> Oyuncu</th>
+                                <th><i class="bi bi-shield"></i> Takım</th>
+                                <th><i class="bi bi-geo-alt"></i> Mevki</th>
+                                <th><i class="bi bi-currency-euro"></i> Tahmini Değer</th>
+                                <th><i class="bi bi-person-badge"></i> Scout</th>
+                                <th><i class="bi bi-calendar"></i> Rapor Tarihi</th>
+                                <th><i class="bi bi-chat-left-text"></i> Notlar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var report in approvedReports)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-secondary">@report.ReportId</span>
+                                    </td>
+                                    <td>
+                                        <a asp-controller="Player" asp-action="Details" asp-route-id="@report.PlayerId"
+                                           class="text-decoration-none fw-bold">
+                                            @report.Player?.FullName
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (report.Player?.Team != null)
+                                        {
+                                            <span class="badge bg-info">@report.Player.Team.TeamName</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(report.Player?.Position))
+                                        {
+                                            <span class="badge bg-primary">@report.Player.Position</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <strong class="text-success">
+                                            @String.Format("{0:N0}", report.PredictedValue) €
+                                        </strong>
+                                        @if (report.Player?.CurrentMarketValue != null)
+                                        {
+                                            var difference = report.PredictedValue - report.Player.CurrentMarketValue;
+                                            var percentage = report.Player.CurrentMarketValue > 0
+                                                ? (difference / report.Player.CurrentMarketValue) * 100
+                                                : 0;
+
+                                            @if (difference > 0)
+                                            {
+                                                <br/>
+                                                <small class="text-success">
+                                                    <i class="bi bi-arrow-up"></i> +@String.Format("{0:N0}", difference)€
+                                                    (@String.Format("{0:F1}", percentage)%)
+                                                </small>
+                                            }
+                                            else if (difference < 0)
+                                            {
+                                                <br/>
+                                                <small class="text-danger">
+                                                    <i class="bi bi-arrow-down"></i> @String.Format("{0:N0}", difference)€
+                                                    (@String.Format("{0:F1}", percentage)%)
+                                                </small>
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-person-circle"></i> @report.User?.Username
+                                    </td>
+                                    <td>
+                                        <small>@report.ReportDate?.ToString("dd.MM.yyyy HH:mm")</small>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(report.Notes))
+                                        {
+                                            @if (report.Notes.Length > 50)
+                                            {
+                                                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                                      title="@report.Notes">
+                                                    @report.Notes.Substring(0, 50)...
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                @report.Notes
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Not eklenmemiş</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer text-muted">
+                <small>
+                    <i class="bi bi-info-circle"></i>
+                    Scout raporları oyuncu detay sayfasından oluşturulabilir.
+                    Tahmini değer ile gerçek piyasa değeri karşılaştırılır.
+                </small>
+            </div>
+        </div>
+
+        <!-- İstatistik Kartları -->
+        <div class="row mt-4">
+            @if (isAdmin)
+            {
+                <div class="col-md-3">
+                    <div class="card text-center border-warning">
+                        <div class="card-body">
+                            <h2 class="text-warning">@pendingReports.Count</h2>
+                            <p class="mb-0">Onay Bekleyen</p>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="col-md-3">
+                <div class="card text-center border-success">
+                    <div class="card-body">
+                        <h2 class="text-success">@approvedReports.Count</h2>
+                        <p class="mb-0">@(isAdmin ? "Onaylı Rapor" : "Toplam Rapor")</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-info">
+                    <div class="card-body">
+                        <h2 class="text-info">@approvedReports.Select(r => r.PlayerId).Distinct().Count()</h2>
+                        <p class="mb-0">Raporlanan Oyuncu</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-primary">
+                    <div class="card-body">
+                        <h2 class="text-primary">@approvedReports.Select(r => r.UserId).Distinct().Count()</h2>
+                        <p class="mb-0">Aktif Scout</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center border-secondary">
+                    <div class="card-body">
+                        <h2 class="text-secondary">
+                            @(approvedReports.Any() ? String.Format("{0:N0}", approvedReports.Average(r => r.PredictedValue ?? 0)) : "0")€
+                        </h2>
+                        <p class="mb-0">Ortalama Tahmin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Bootstrap tooltips'i etkinleştir
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    </script>
+}

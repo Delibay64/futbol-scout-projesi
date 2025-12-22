@@ -170,25 +170,38 @@ namespace ScoutWeb.Controllers
 [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Player player, string? NewTeamName)
         {
-            // Validation Service kullan
-            if (!_validationService.ValidatePlayer(player, out string errorMessage))
+            try
             {
-                ModelState.AddModelError("", errorMessage);
+                // Validation Service kullan
+                if (!_validationService.ValidatePlayer(player, out string errorMessage))
+                {
+                    ModelState.AddModelError("", errorMessage);
+                    ViewBag.Teams = _context.Teams.ToList();
+                    return View(player);
+                }
+
+                ModelState.Remove("TeamId");
+                ModelState.Remove("Team");
+                ModelState.Remove("Playerstats");
+                ModelState.Remove("Scoutreports");
+
+                if (ModelState.IsValid)
+                {
+                    // Servis katmanını kullan
+                    await _playerService.CreatePlayerAsync(player, NewTeamName);
+                    TempData["Success"] = $"✓ {player.FullName} başarıyla eklendi!";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 ViewBag.Teams = _context.Teams.ToList();
                 return View(player);
             }
-
-            ModelState.Remove("TeamId");
-
-            if (ModelState.IsValid)
+            catch (Exception ex)
             {
-                // Servis katmanını kullan
-                await _playerService.CreatePlayerAsync(player, NewTeamName);
-                return RedirectToAction(nameof(Index));
+                TempData["Error"] = $"Hata: {ex.Message}";
+                ViewBag.Teams = _context.Teams.ToList();
+                return View(player);
             }
-            
-            ViewBag.Teams = _context.Teams.ToList();
-            return View(player);
         }
 
         // --- 5. YAPAY ZEKA FİYAT TAHMİNİ ---
@@ -516,7 +529,12 @@ namespace ScoutWeb.Controllers
         {
             try
             {
-                var player = await _context.Players.FindAsync(id);
+                var player = await _context.Players
+                    .Include(p => p.Playerstats)
+                    .Include(p => p.Scoutreports)
+                    .Include(p => p.PlayerPriceLogs)
+                    .FirstOrDefaultAsync(p => p.PlayerId == id);
+
                 if (player == null)
                 {
                     TempData["Error"] = "Oyuncu bulunamadı!";
@@ -525,6 +543,23 @@ namespace ScoutWeb.Controllers
 
                 string playerName = player.FullName ?? "Bilinmeyen Oyuncu";
 
+                // Önce ilişkili kayıtları sil
+                if (player.Playerstats != null && player.Playerstats.Any())
+                {
+                    _context.Playerstats.RemoveRange(player.Playerstats);
+                }
+
+                if (player.Scoutreports != null && player.Scoutreports.Any())
+                {
+                    _context.Scoutreports.RemoveRange(player.Scoutreports);
+                }
+
+                if (player.PlayerPriceLogs != null && player.PlayerPriceLogs.Any())
+                {
+                    _context.PriceLogs.RemoveRange(player.PlayerPriceLogs);
+                }
+
+                // Sonra oyuncuyu sil
                 _context.Players.Remove(player);
                 await _context.SaveChangesAsync();
 
@@ -533,7 +568,7 @@ namespace ScoutWeb.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"Silme işlemi başarısız: {ex.Message}";
+                TempData["Error"] = $"Silme işlemi başarısız: {ex.InnerException?.Message ?? ex.Message}";
                 return RedirectToAction("Index");
             }
         }

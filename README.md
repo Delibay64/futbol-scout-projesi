@@ -1,118 +1,107 @@
-# ⚽ Futbol Scout Sistemi
+# ⚽ Futbol Scout Web Uygulaması
 
-Makine Öğrenmesi ile futbolcu piyasa değeri tahmini yapan mikroservis tabanlı web uygulaması.
+Profesyonel futbol oyuncuları için yapay zeka destekli skaut ve piyasa değeri tahmin sistemi.
 
-## 🎯 Proje Özeti
+## 🚀 Hızlı Başlangıç
 
-Bu proje, futbolcu istatistiklerini analiz ederek piyasa değeri tahmini yapan, modern web teknolojileri ve mikroservis mimarisi kullanan bir scout sistemidir.
+### Otomatik Kurulum (Windows)
+```bash
+# 1. Veritabanı kurulumu
+setup_database.bat
+
+# 2. Python kurulumu
+setup_python.bat
+
+# 3. Node.js kurulumu
+setup_nodejs.bat
+
+# 4. .NET build
+cd web_ui\ScoutWeb && dotnet build
+
+# 5. Tüm servisleri başlat
+start_all_windows.bat
+```
+
+### Web Arayüzü
+```
+http://localhost:5199
+```
+
+**Login:** `admin` / `123456`
+
+---
+
+## 📋 Özellikler
+
+- ✅ Oyuncu yönetimi (CRUD)
+- ✅ Transfermarkt web scraping
+- ✅ Yapay zeka ile değer tahmini
+- ✅ Scout raporu sistemi (onay mekanizması)
+- ✅ Admin paneli
+- ✅ 6 Katmanlı SOA mimarisi
+- ✅ REST, SOAP, gRPC protokolleri
+- ✅ BCrypt şifreleme
+- ✅ Role-based authorization
+
+---
+
+## 🏗️ Mimari
+
+### 6 Katmanlı SOA
+```
+1. Presentation Layer (Controllers)
+2. Business Logic Layer (Services)
+3. Data Access Layer (Repositories)
+4. Domain Model Layer (Models)
+5. Data Context Layer (EF Core)
+6. Cross-Cutting Concerns (Middleware)
+```
+
+### Servisler
+```
+ASP.NET (5199) → Python ML (5000)
+                 Node.js API (3000)
+                 gRPC (5001)
+                 ↓
+             PostgreSQL (5432)
+```
+
+---
 
 ## 🛠️ Teknolojiler
 
-### Backend
-- **ASP.NET Core 7.0** - MVC Web Framework
-- **Python Flask** - Machine Learning API
-- **Node.js Express** - REST & SOAP API
+- ASP.NET Core 8.0
+- PostgreSQL 14+
+- Node.js 18+
+- Python 3.9+
+- Entity Framework Core
+- gRPC, SOAP, REST
+- Bootstrap 5
+- scikit-learn
 
-### Database
-- **PostgreSQL** - Ana veritabanı
-- 7 Tablo, 5 View, 2 Stored Procedure, 2 Function
-- Triggers ve Constraints
+---
 
-### Machine Learning
-- **Random Forest Regressor**
-- **Scikit-learn**
-- Web scraping (Transfermarkt)
+## 📚 Dokümantasyon
 
-### Frontend
-- **Bootstrap 5**
-- **jQuery**
-- **Razor Views**
+- [KURULUM_REHBERI.md](KURULUM_REHBERI.md) - Detaylı kurulum
+- [HIZLI_BASLATMA.md](HIZLI_BASLATMA.md) - Hızlı başlat
+- [SOA_MIMARISI_DOKUMANTASYONU.md](SOA_MIMARISI_DOKUMANTASYONU.md) - Mimari
 
-## 📊 Mimari
-```
-┌─────────────┐
-│  ASP.NET    │ (Port 5199)
-│  Web UI     │
-└──────┬──────┘
-       │
-   ┌───┴───┬─────────┐
-   ▼       ▼         ▼
-┌─────┐ ┌─────┐  ┌──────┐
-│Flask│ │Node │  │ SOAP │
-│ ML  │ │ API │  │  API │
-└──┬──┘ └──┬──┘  └───┬──┘
-   │       │         │
-   └───────┴─────────┘
-           │
-      ┌────▼─────┐
-      │PostgreSQL│
-      └──────────┘
-```
+---
 
-## 🚀 Kurulum
+## 🎮 Kullanım
 
-### 1. PostgreSQL Kurulumu
-```bash
-# Veritabanı oluştur
-CREATE DATABASE ScoutDB;
+### Sayfalar
+- `/Player` - Oyuncu listesi
+- `/Player/Create` - Oyuncu ekle
+- `/Reports/ScoutReport` - Scout raporları
+- `/Reports/AdminDashboard` - Admin paneli
 
-# SQL dosyasını çalıştır
-psql -U postgres -d ScoutDB -f database/schema.sql
-```
+### Scout Raporu Akışı
+1. Kullanıcı rapor ekler (onaysız)
+2. Admin onaylar/reddeder
+3. Onaylanan raporlar herkese gösterilir
 
-### 2. Python ML Servisi
-```bash
-cd ml_service
-pip install -r requirements.txt
-python ai_service.py
-```
+---
 
-### 3. Node.js API
-```bash
-cd nodejs_api
-npm install
-node server.js
-```
-
-### 4. ASP.NET Web
-```bash
-cd web_ui/ScoutWeb
-dotnet restore
-dotnet run
-```
-
-## 📱 Kullanım
-
-1. **Ana Sayfa:** http://localhost:5199
-2. **Node.js API:** http://localhost:3000/api/players
-3. **SOAP WSDL:** http://localhost:3000/soap?wsdl
-4. **ML API:** http://localhost:5000/predict
-
-## ✨ Özellikler
-
-- ✅ Kullanıcı kayıt/giriş sistemi
-- ✅ Rol bazlı yetkilendirme (Admin/User)
-- ✅ Oyuncu CRUD işlemleri
-- ✅ ML ile piyasa değeri tahmini
-- ✅ Web scraping (Transfermarkt)
-- ✅ REST API
-- ✅ SOAP Web Servisi
-- ✅ Hazır API entegrasyonu (Döviz kuru)
-- ✅ Responsive tasarım
-
-## 📈 Proje Başarı Oranı
-
-- **Makine Öğrenmesi:** 100/100 ✅
-- **Veri Tabanı:** 100/100 ✅
-- **İleri Web Programlama:** 100/100 ✅
-- **Servis Odaklı Mimari:** 60/100 ✅
-
-**TOPLAM: 360/400 (%90)**
-
-## 👥 Geliştirici
-
-[İsmin Buraya]
-
-## 📝 Lisans
-
-Bu proje eğitim amaçlıdır.
+**Detaylı bilgi için [KURULUM_REHBERI.md](KURULUM_REHBERI.md) dosyasını inceleyin.**

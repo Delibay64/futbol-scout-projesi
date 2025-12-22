@@ -158,5 +158,102 @@ namespace ScoutWeb.Controllers
                 return View(new List<PlayerDetailsTRView>());
             }
         }
+
+        // ✅ SCOUT RAPORLARI LİSTESİ (Onaylılar)
+        public async Task<IActionResult> ScoutReport()
+        {
+            try
+            {
+                var isAdmin = HttpContext.Session.GetString("Username") == "admin";
+
+                // Admin tüm raporları görür, normal kullanıcılar sadece onaylıları
+                var reportsQuery = _context.Scoutreports
+                    .Include(sr => sr.Player)
+                        .ThenInclude(p => p!.Team)
+                    .Include(sr => sr.User)
+                    .AsQueryable();
+
+                if (!isAdmin)
+                {
+                    // Normal kullanıcılar sadece onaylı raporları görür
+                    reportsQuery = reportsQuery.Where(sr => sr.IsApproved);
+                }
+
+                var reports = await reportsQuery
+                    .OrderByDescending(sr => sr.ReportDate)
+                    .ToListAsync();
+
+                // Admin için onay bekleyen raporları da gönder
+                if (isAdmin)
+                {
+                    var pendingReports = reports.Where(r => !r.IsApproved).ToList();
+                    ViewBag.PendingReports = pendingReports;
+                    ViewBag.ApprovedReports = reports.Where(r => r.IsApproved).ToList();
+                }
+
+                ViewBag.IsAdmin = isAdmin;
+
+                return View(reports);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Hata: {ex.Message}";
+                return View(new List<Scoutreport>());
+            }
+        }
+
+        // ✅ YENİ: RAPOR ONAYLAMA (Sadece Admin)
+        [HttpPost]
+        public async Task<IActionResult> ApproveReport(int reportId)
+        {
+            if (HttpContext.Session.GetString("Username") != "admin")
+            {
+                TempData["Error"] = "Bu işlem için yetkiniz yok!";
+                return RedirectToAction("ScoutReport");
+            }
+
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                    "CALL sp_ApproveScoutReport({0})",
+                    reportId
+                );
+
+                TempData["Success"] = "✓ Rapor başarıyla onaylandı!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Hata: {ex.Message}";
+            }
+
+            return RedirectToAction("ScoutReport");
+        }
+
+        // ✅ YENİ: RAPOR REDDETME (Sadece Admin)
+        [HttpPost]
+        public async Task<IActionResult> RejectReport(int reportId)
+        {
+            if (HttpContext.Session.GetString("Username") != "admin")
+            {
+                TempData["Error"] = "Bu işlem için yetkiniz yok!";
+                return RedirectToAction("ScoutReport");
+            }
+
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                    "CALL sp_RejectScoutReport({0})",
+                    reportId
+                );
+
+                TempData["Success"] = "✓ Rapor reddedildi ve silindi!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Hata: {ex.Message}";
+            }
+
+            return RedirectToAction("ScoutReport");
+        }
     }
 }

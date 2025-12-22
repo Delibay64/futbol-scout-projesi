@@ -26,4 +26,6 @@ public partial class Player
     public virtual ICollection<Playerstat> Playerstats { get; set; } = new List<Playerstat>();
 
     public virtual ICollection<Scoutreport> Scoutreports { get; set; } = new List<Scoutreport>();
+
+    public virtual ICollection<PlayerPriceLog> PlayerPriceLogs { get; set; } = new List<PlayerPriceLog>();
 }

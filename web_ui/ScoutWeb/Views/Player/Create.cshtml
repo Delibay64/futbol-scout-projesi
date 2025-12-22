@@ -127,7 +127,7 @@
                     document.getElementById("txtAge").value = data.Age;
                     document.getElementById("txtNationality").value = data.Nationality;
                     document.getElementById("txtValue").value = data.CurrentMarketValue;
-                    
+
                     // İstatistikleri gizli alanlara yaz
                     document.getElementById("hdnGoals").value = data.Goals;
                     document.getElementById("hdnAssists").value = data.Assists;
@@ -150,7 +150,7 @@
                     var teamSelect = document.getElementById("ddlTeams");
                     var newTeamInput = document.getElementById("txtNewTeam");
                     var infoText = document.getElementById("teamInfoText");
-                    
+
                     var scraperTeamName = data.TeamName; // "Al Nassr FC"
                     var foundTeam = false;
 
@@ -178,7 +178,7 @@
                     }
 
                     alert("✅ Bilgiler Çekildi!\nGol: " + data.Goals + " | Asist: " + data.Assists);
-                    
+
                 } else {
                     alert("❌ Hata: " + (data.message || "Bilinmeyen hata."));
                 }

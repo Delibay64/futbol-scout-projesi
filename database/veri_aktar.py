@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 # 1. Dosya adını senin dosyanla eşledim:
 csv_dosyasi = 'Final_Veriler_Kalecisiz.csv'
 # 2. ŞİFRENİ BURAYA YAZ:
-db_sifre = 'admin'  # <-- Buraya kendi PostgreSQL şifreni yaz!
+db_sifre = 'oguzhan121734'  # <-- Buraya kendi PostgreSQL şifreni yaz!
 
 # Veritabanı Bağlantısı
 baglanti_cumlesi = f'postgresql://postgres:{db_sifre}@localhost:5432/ScoutDB'

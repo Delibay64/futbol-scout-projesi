@@ -75,6 +75,7 @@ public partial class ScoutDbContext : DbContext
 
             entity.HasOne(d => d.Player).WithMany(p => p.Playerstats)
                 .HasForeignKey(d => d.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("playerstats_player_id_fkey");
         });
 
@@ -97,9 +98,11 @@ public partial class ScoutDbContext : DbContext
             entity.Property(e => e.PredictedValue).HasPrecision(15, 2).HasColumnName("predicted_value");
             entity.Property(e => e.ReportDate).HasDefaultValueSql("CURRENT_TIMESTAMP").HasColumnType("timestamp without time zone").HasColumnName("report_date");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.IsApproved).HasDefaultValue(false).HasColumnName("is_approved");
 
             entity.HasOne(d => d.Player).WithMany(p => p.Scoutreports)
                 .HasForeignKey(d => d.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("scoutreports_player_id_fkey");
 
             entity.HasOne(d => d.User).WithMany(p => p.Scoutreports)
@@ -132,6 +135,24 @@ public partial class ScoutDbContext : DbContext
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
                 .HasConstraintName("users_role_id_fkey");
+        });
+
+        modelBuilder.Entity<PlayerPriceLog>(entity =>
+        {
+            entity.HasKey(e => e.LogId).HasName("player_price_log_pkey");
+            entity.ToTable("player_price_log");
+
+            entity.Property(e => e.LogId).HasColumnName("log_id");
+            entity.Property(e => e.PlayerId).HasColumnName("player_id");
+            entity.Property(e => e.OldValue).HasPrecision(15, 2).HasColumnName("old_value");
+            entity.Property(e => e.NewValue).HasPrecision(15, 2).HasColumnName("new_value");
+            entity.Property(e => e.ChangePercentage).HasColumnName("change_percentage");
+            entity.Property(e => e.ChangedAt).HasDefaultValueSql("CURRENT_TIMESTAMP").HasColumnType("timestamp without time zone").HasColumnName("changed_at");
+
+            entity.HasOne(d => d.Player).WithMany(p => p.PlayerPriceLogs)
+                .HasForeignKey(d => d.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("player_price_log_player_id_fkey");
         });
 
         // --- 3. POSTGRESQL VERİTABANI VIEW'LARI ---

@@ -17,6 +17,8 @@ public partial class Scoutreport
 
     public DateTime? ReportDate { get; set; }
 
+    public bool IsApproved { get; set; } = false; // Onay durumu
+
     public virtual Player? Player { get; set; }
 
     public virtual User? User { get; set; }

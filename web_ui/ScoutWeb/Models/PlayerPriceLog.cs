@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScoutWeb.Models
 {
-    [Table("player_price_logs")] // SQL'deki tablo adımız
+    [Table("player_price_log")] // SQL'deki tablo adımız (tekil)
     public class PlayerPriceLog
     {
         [Key]
@@ -23,7 +23,10 @@ namespace ScoutWeb.Models
         [Column("new_value")]
         public decimal NewValue { get; set; }
 
-        [Column("change_date")]
-        public DateTime ChangeDate { get; set; }
+        [Column("change_percentage")]
+        public int? ChangePercentage { get; set; }
+
+        [Column("changed_at")]
+        public DateTime ChangedAt { get; set; }
     }
 }
