@@ -5,8 +5,7 @@ using ScoutWeb.Models;
 
 namespace ScoutWeb.Controllers
 {
-    // Geçici olarak Admin kontrolünü kaldırdım - test için
-    // [Authorize(Roles = "Admin")]
+    [Authorize] // Giriş yapmış kullanıcılar erişebilir
     public class ReportsController : Controller
     {
         private readonly ScoutDbContext _context;
@@ -18,34 +17,25 @@ namespace ScoutWeb.Controllers
 
         public async Task<IActionResult> AdminDashboard()
         {
+            // Sadece "admin" kullanıcısı erişebilir
+            if (HttpContext.Session.GetString("Username") != "admin")
+            {
+                TempData["Error"] = "Bu sayfaya erişim yetkiniz yok!";
+                return RedirectToAction("Index", "Home");
+            }
+
             try
             {
                 // ✅ VERİTABANI VIEW KULLANIMI: vw_PlayerDetailsTR (fn_EuroToTL fonksiyonu otomatik çalışır)
                 var playerDetails = await _context.VwPlayerDetailsTR
                     .OrderByDescending(p => p.EuroValue)
                     .Take(20)
-                    .Select(p => new PlayerDetailReport
-                    {
-                        FullName = p.FullName,
-                        TeamName = p.TeamName,
-                        Position = p.Position,
-                        Age = p.Age ?? 0,
-                        EuroValue = p.EuroValue ?? 0,
-                        TLValue = p.TLValue ?? 0
-                    })
                     .ToListAsync();
 
                 // ✅ VERİTABANI VIEW KULLANIMI: vw_TopScorers (fn_GoalsPerMatch fonksiyonu otomatik çalışır)
                 var topScorers = await _context.VwTopScorers
                     .OrderByDescending(s => s.Goals)
                     .Take(10)
-                    .Select(s => new TopScorerReport
-                    {
-                        FullName = s.FullName,
-                        Goals = s.Goals ?? 0,
-                        Assists = s.Assists ?? 0,
-                        GoalsPerMatch = s.GoalsPerMatch ?? 0
-                    })
                     .ToListAsync();
 
                 ViewBag.TopScorers = topScorers;
@@ -58,16 +48,21 @@ namespace ScoutWeb.Controllers
                 TempData["Error"] = $"Hata: {ex.Message}";
 
                 // Boş liste ile view'i döndür
-                ViewBag.TopScorers = new List<TopScorerReport>();
-                return View(new List<PlayerDetailReport>());
+                ViewBag.TopScorers = new List<TopScorerView>();
+                return View(new List<PlayerDetailsTRView>());
             }
         }
 
         [HttpPost]
-        // Geçici olarak Admin kontrolü kaldırıldı
-        // [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ApplyRaise(int playerId, int percentage)
         {
+            // Sadece "admin" kullanıcısı bu işlemi yapabilir
+            if (HttpContext.Session.GetString("Username") != "admin")
+            {
+                TempData["Error"] = "Bu işlem için yetkiniz yok!";
+                return RedirectToAction("Index", "Home");
+            }
+
             try
             {
                 // ✅ STORED PROCEDURE KULLANIMI: sp_UpdateValue

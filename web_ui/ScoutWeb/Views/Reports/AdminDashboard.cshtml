@@ -1,9 +1,9 @@
-@model List<ScoutWeb.Models.PlayerDetailReport>
+@model List<ScoutWeb.Models.PlayerDetailsTRView>
 
 @{
     ViewData["Title"] = "Yönetici Raporları";
     // Controller'dan ViewBag ile gelen golcü listesini yakalıyoruz
-    var scorers = ViewBag.TopScorers as List<ScoutWeb.Models.TopScorerReport>;
+    var scorers = ViewBag.TopScorers as List<ScoutWeb.Models.TopScorerView>;
 }
 
 <div class="container mt-4">
@@ -55,8 +55,8 @@
                                             <td>@item.TeamName</td>
                                             <td>@item.Position</td>
                                             <td>@item.Age</td>
-                                            <td>€@item.EuroValue.ToString("N0")</td>
-                                            <td class="text-success fw-bold">₺@item.TLValue.ToString("N0")</td>
+                                            <td>€@(item.EuroValue?.ToString("N0") ?? "0")</td>
+                                            <td class="text-success fw-bold">₺@(item.TLValue?.ToString("N0") ?? "0")</td>
                                         </tr>
                                     }
                                 }
@@ -94,7 +94,7 @@
                                     </span>
                                     <div class="text-end">
                                         <span class="badge bg-primary rounded-pill mb-1">@s.Goals Gol</span><br/>
-                                        <span class="badge bg-light text-dark border">Ort: @s.GoalsPerMatch.ToString("0.00")</span>
+                                        <span class="badge bg-light text-dark border">Ort: @((s.GoalsPerMatch ?? 0).ToString("0.00"))</span>
                                     </div>
                                 </li>
                             }
@@ -116,14 +116,14 @@
                 </div>
                 <div class="card-body">
                     <p class="text-muted small">Bu işlem, seçilen oyuncunun piyasa değerini veritabanı seviyesinde kalıcı olarak günceller.</p>
-                    
+
                     <form asp-controller="Reports" asp-action="ApplyRaise" method="post">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Oyuncu ID</label>
                             <input type="number" name="playerId" class="form-control" required placeholder="Örn: 10" />
                             <div class="form-text">Oyuncunun ID numarasını giriniz.</div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">Zam Oranı (%)</label>
                             <div class="input-group">

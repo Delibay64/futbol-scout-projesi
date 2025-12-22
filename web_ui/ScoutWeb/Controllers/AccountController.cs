@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScoutWeb.Models;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace ScoutWeb.Controllers
 {
@@ -30,15 +28,13 @@ namespace ScoutWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Şifreyi Hashle (Veritabanındaki hashli haliyle karşılaştırmak için)
-                string hashedPassword = HashPassword(model.Password);
-
-                // Kullanıcıyı bul
+                // Kullanıcıyı kullanıcı adına göre bul
                 var user = await _context.Users
                     .Include(u => u.Role) // Rolünü de çek (Admin mi User mı?)
-                    .FirstOrDefaultAsync(u => u.Username == model.Username && u.PasswordHash == hashedPassword);
+                    .FirstOrDefaultAsync(u => u.Username == model.Username);
 
-                if (user != null)
+                // Kullanıcı bulundu ve şifre doğru mu kontrol et (BCrypt ile)
+                if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash))
                 {
                     // Kimlik Kartını Oluştur (Claims)
                     var claims = new List<Claim>
@@ -52,6 +48,11 @@ namespace ScoutWeb.Controllers
 
                     // Giriş Yap (Cookie Ver)
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                    // Session'a kullanıcı bilgilerini kaydet (Admin paneli kontrolü için)
+                    HttpContext.Session.SetString("Username", user.Username);
+                    HttpContext.Session.SetString("Role", user.Role?.RoleName ?? "Viewer");
+                    HttpContext.Session.SetInt32("UserId", user.UserId);
 
                     return RedirectToAction("Index", "Home"); // Ana sayfaya git
                 }
@@ -89,7 +90,7 @@ namespace ScoutWeb.Controllers
                 {
                     Username = model.Username,
                     Email = model.Email,
-                    PasswordHash = HashPassword(model.Password), // Şifreyi şifrele
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password), // BCrypt ile şifrele
                     RoleId = defaultRole?.RoleId ?? 1,
                     CreatedAt = DateTime.Now
                 };
@@ -106,23 +107,13 @@ namespace ScoutWeb.Controllers
         // --- ÇIKIŞ YAP (LOGOUT) ---
         public async Task<IActionResult> Logout()
         {
+            // Session'ı temizle
+            HttpContext.Session.Clear();
+
+            // Cookie authentication'dan çıkış yap
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
             return RedirectToAction("Login");
-        }
-        
-        // --- YARDIMCI: ŞİFRE HASHLEME (SHA256) ---
-        private string HashPassword(string password)
-        {
-            using (var sha256 = SHA256.Create())
-            {
-                var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                var builder = new StringBuilder();
-                foreach (var b in bytes)
-                {
-                    builder.Append(b.ToString("x2"));
-                }
-                return builder.ToString();
-            }
         }
     }
 }

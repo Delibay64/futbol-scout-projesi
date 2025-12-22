@@ -16,14 +16,24 @@ builder.Services.AddDbContext<ScoutDbContext>(options =>
     builder.Services.AddScoped<IPlayerService, PlayerService>();
     builder.Services.AddScoped<IValidationService, ValidationService>();
 
-// --- 2. GİRİŞ SİSTEMİ (Hata 1'in Çözümü) ---
+// --- 2. SESSION YAPILANDIRMASI ---
+// Session kullanmak için gerekli (Admin paneli role kontrolü için)
+builder.Services.AddDistributedMemoryCache(); // Session için in-memory cache
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(60); // Session süresi
+    options.Cookie.HttpOnly = true; // XSS koruması
+    options.Cookie.IsEssential = true; // GDPR uyumlu
+});
+
+// --- 3. GİRİŞ SİSTEMİ (Hata 1'in Çözümü) ---
 // Bu satır olmadan "No sign-in authentication handlers" hatası alırsın.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login"; // Giriş yapmamış kişi buraya gitsin
         options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60); 
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     });
 
 // Servisleri ekle (MVC yapısı için şart)
@@ -43,7 +53,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// --- 3. YETKİLENDİRME SIRASI (Çok Kritik!) ---
+// --- SESSION'I AKTİF ET ---
+app.UseSession(); // Session kullanımı için gerekli
+
+// --- YETKİLENDİRME SIRASI (Çok Kritik!) ---
 app.UseAuthentication(); // Önce: Kimsin? (Giriş kontrolü)
 app.UseAuthorization();  // Sonra: Girebilir misin? (Yetki kontrolü)
 

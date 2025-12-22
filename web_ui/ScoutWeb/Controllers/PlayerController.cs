@@ -392,6 +392,76 @@ namespace ScoutWeb.Controllers
                 return Json(new { status = "error", message = ex.Message });
             }
         }
+
+        // --- YENİ: OYUNCU İSTATİSTİKLERİNİ GÜNCELLE (sp_UpdatePlayerStats) ---
+        [HttpPost]
+        public async Task<IActionResult> UpdatePlayerStats(
+            int playerId,
+            string season,
+            int matches,
+            int goals,
+            int assists,
+            int yellowCards = 0,
+            int redCards = 0,
+            int minutes = 0)
+        {
+            try
+            {
+                // ✅ STORED PROCEDURE KULLANIMI: sp_UpdatePlayerStats
+                await _context.Database.ExecuteSqlRawAsync(
+                    "CALL sp_UpdatePlayerStats({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7})",
+                    playerId, season, matches, goals, assists, yellowCards, redCards, minutes
+                );
+
+                TempData["Success"] = $"✓ {season} sezonu istatistikleri güncellendi!";
+                return RedirectToAction("Details", new { id = playerId });
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Hata: " + ex.Message;
+                return RedirectToAction("Details", new { id = playerId });
+            }
+        }
+
+        // --- YENİ: SCOUT RAPORU OLUŞTUR (sp_CreateScoutReport) ---
+        [HttpPost]
+        public async Task<IActionResult> CreateScoutReport(
+            int playerId,
+            decimal predictedValue,
+            string notes)
+        {
+            try
+            {
+                // Kullanıcı ID'sini session'dan al
+                var username = HttpContext.Session.GetString("Username");
+                if (string.IsNullOrEmpty(username))
+                {
+                    return Json(new { status = "error", message = "Giriş yapmalısınız!" });
+                }
+
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+                if (user == null)
+                {
+                    return Json(new { status = "error", message = "Kullanıcı bulunamadı!" });
+                }
+
+                // ✅ STORED PROCEDURE KULLANIMI: sp_CreateScoutReport
+                await _context.Database.ExecuteSqlRawAsync(
+                    "CALL sp_CreateScoutReport({0}, {1}, {2}, {3})",
+                    user.UserId, playerId, predictedValue, notes ?? ""
+                );
+
+                return Json(new {
+                    status = "success",
+                    message = "Scout raporu başarıyla oluşturuldu!",
+                    predictedValue = predictedValue
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = "error", message = ex.Message });
+            }
+        }
     }
 
     // ViewModel (Controller DIŞINDA, namespace içinde)

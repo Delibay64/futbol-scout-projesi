@@ -24,11 +24,7 @@ public partial class ScoutDbContext : DbContext
     public virtual DbSet<Team> Teams { get; set; }
     public virtual DbSet<User> Users { get; set; }
 
-    // --- 2. YENİ EKLENEN RAPOR VIEW'LARI (Buraya ekledik) ---
-    public virtual DbSet<PlayerDetailReport> PlayerReports { get; set; }
-    public virtual DbSet<TopScorerReport> ScorerReports { get; set; }
-
-    // --- 3. VERİTABANI VIEW'LARI (PostgreSQL'deki VIEW'lar) ---
+    // --- 2. VERİTABANI VIEW'LARI (PostgreSQL'deki VIEW'lar) ---
     public virtual DbSet<PlayerDetailsTRView> VwPlayerDetailsTR { get; set; }
     public virtual DbSet<TopScorerView> VwTopScorers { get; set; }
     public virtual DbSet<YoungTalentView> VwYoungTalents { get; set; }
@@ -36,7 +32,10 @@ public partial class ScoutDbContext : DbContext
     public virtual DbSet<ScoutSummaryView> VwScoutSummary { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseNpgsql("Host=localhost;Database=ScoutDB;Username=postgres;Password=admin"); 
+    {
+        // Connection string Program.cs'den Dependency Injection ile gelecek
+        // Buraya hardcoded connection string yazmayın!
+    } 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -135,23 +134,7 @@ public partial class ScoutDbContext : DbContext
                 .HasConstraintName("users_role_id_fkey");
         });
 
-        // --- 3. YENİ EKLENEN VIEW AYARLARI (Metodun en altına ekledik) ---
-
-        // Rapor 1: Oyuncu Detayları View
-        modelBuilder.Entity<PlayerDetailReport>(entity =>
-        {
-            entity.HasNoKey();
-            entity.ToView("vw_playerdetailstr");
-        });
-
-        // Rapor 2: Gol Krallığı View
-        modelBuilder.Entity<TopScorerReport>(entity =>
-        {
-            entity.HasNoKey();
-            entity.ToView("vw_topscorers");
-        });
-
-        // --- 4. POSTGRESQL VERİTABANI VIEW'LARI ---
+        // --- 3. POSTGRESQL VERİTABANI VIEW'LARI ---
 
         // VIEW: vw_PlayerDetailsTR (TL cinsinden oyuncu değerleri)
         modelBuilder.Entity<PlayerDetailsTRView>(entity =>

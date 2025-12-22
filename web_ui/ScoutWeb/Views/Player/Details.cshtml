@@ -144,5 +144,141 @@
                 btn.innerHTML = "<i class='bi bi-robot'></i> Tekrar Tahmin Yap";
             });
         }
+
+        // --- YENİ: SCOUT RAPORU OLUŞTUR (sp_CreateScoutReport kullanımı) ---
+        function createScoutReport() {
+            const predictedValue = parseFloat(document.getElementById('scoutPredictedValue').value);
+            const notes = document.getElementById('scoutNotes').value;
+
+            if (!predictedValue || predictedValue <= 0) {
+                alert('Lütfen geçerli bir değer tahmini girin!');
+                return;
+            }
+
+            fetch('/Player/CreateScoutReport', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `playerId=@Model.PlayerId&predictedValue=${predictedValue}&notes=${encodeURIComponent(notes)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('✓ ' + data.message);
+                    document.getElementById('scoutPredictedValue').value = '';
+                    document.getElementById('scoutNotes').value = '';
+                } else {
+                    alert('✗ ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Hata: ' + error);
+            });
+        }
+
+        // Modal açma butonları ekle
+        document.addEventListener('DOMContentLoaded', function() {
+            const cardBody = document.querySelector('.card-body');
+            if (cardBody) {
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'd-flex gap-2 mb-3';
+                buttonGroup.innerHTML = `
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateStatsModal">
+                        <i class="bi bi-graph-up"></i> İstatistik Güncelle
+                    </button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#scoutReportModal">
+                        <i class="bi bi-file-earmark-text"></i> Scout Raporu Oluştur
+                    </button>
+                `;
+                cardBody.insertBefore(buttonGroup, cardBody.firstChild);
+            }
+        });
     </script>
 }
+
+<!-- YENİ: İstatistik Güncelleme Modal -->
+<div class="modal fade" id="updateStatsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">📊 İstatistik Güncelle (sp_UpdatePlayerStats)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="UpdatePlayerStats">
+                <div class="modal-body">
+                    <input type="hidden" name="playerId" value="@Model.PlayerId" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Sezon</label>
+                        <input type="text" name="season" class="form-control" value="2024-25" required />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Maç Sayısı</label>
+                            <input type="number" name="matches" class="form-control" min="0" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Gol</label>
+                            <input type="number" name="goals" class="form-control" min="0" required />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Asist</label>
+                            <input type="number" name="assists" class="form-control" min="0" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Dakika</label>
+                            <input type="number" name="minutes" class="form-control" min="0" value="0" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Sarı Kart</label>
+                            <input type="number" name="yellowCards" class="form-control" min="0" value="0" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Kırmızı Kart</label>
+                            <input type="number" name="redCards" class="form-control" min="0" value="0" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    <button type="submit" class="btn btn-primary">💾 Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- YENİ: Scout Raporu Modal -->
+<div class="modal fade" id="scoutReportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">📝 Scout Raporu Oluştur (sp_CreateScoutReport)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Tahmini Değer (€)</label>
+                    <input type="number" id="scoutPredictedValue" class="form-control" step="1000" min="0" placeholder="Örn: 5000000" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Notlar</label>
+                    <textarea id="scoutNotes" class="form-control" rows="4" placeholder="Oyuncu hakkında gözlemleriniz..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-success" onclick="createScoutReport()">💾 Rapor Oluştur</button>
+            </div>
+        </div>
+    </div>
+</div>
