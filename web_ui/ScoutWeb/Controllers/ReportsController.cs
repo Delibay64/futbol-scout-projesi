@@ -57,10 +57,11 @@ namespace ScoutWeb.Controllers
         public async Task<IActionResult> ApplyRaise(int playerId, int percentage)
         {
             // Sadece "admin" kullanıcısı bu işlemi yapabilir
-            if (HttpContext.Session.GetString("Username") != "admin")
+            // Cookie Authentication kullanıyoruz, User.Identity.Name ile kontrol
+            if (User.Identity?.Name?.ToLower() != "admin")
             {
-                TempData["Error"] = "Bu işlem için yetkiniz yok!";
-                return RedirectToAction("Index", "Home");
+                TempData["Error"] = "Bu işlem için yetkiniz yok! Sadece admin kullanıcısı piyasa değeri değiştirebilir.";
+                return RedirectToAction("Details", "Player", new { id = playerId });
             }
 
             try
@@ -72,14 +73,14 @@ namespace ScoutWeb.Controllers
                     percentage
                 );
 
-                TempData["Message"] = $"Oyuncu #{playerId} için %{percentage} zam uygulandı!";
+                TempData["Success"] = $"✓ Oyuncu piyasa değeri %{percentage} oranında güncellendi!";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Hata: " + ex.Message;
+                TempData["Error"] = $"Hata: {ex.Message}";
             }
 
-            return RedirectToAction("AdminDashboard");
+            return RedirectToAction("Details", "Player", new { id = playerId });
         }
 
         public async Task<IActionResult> TopScorers()

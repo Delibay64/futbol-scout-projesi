@@ -183,18 +183,23 @@ namespace ScoutWeb.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                // Takımda oyuncu varsa uyarı
+                string teamName = team.TeamName ?? "Bilinmeyen Takım";
+
+                // Takımda oyuncu varsa, önce oyuncuların team_id'sini NULL yap
                 if (team.Players.Any())
                 {
-                    TempData["Error"] = $"{team.TeamName} takımında {team.Players.Count} oyuncu var. Önce oyuncuları silin veya başka takıma transfer edin!";
-                    return RedirectToAction(nameof(Index));
+                    foreach (var player in team.Players)
+                    {
+                        player.TeamId = null;
+                    }
+                    await _context.SaveChangesAsync();
                 }
 
-                string teamName = team.TeamName ?? "Bilinmeyen Takım";
+                // Şimdi takımı sil
                 _context.Teams.Remove(team);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = $"✓ {teamName} takımı başarıyla silindi!";
+                TempData["Success"] = $"✓ {teamName} takımı başarıyla silindi! ({team.Players.Count} oyuncu serbest kaldı)";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
