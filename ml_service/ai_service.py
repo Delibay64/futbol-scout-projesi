@@ -1,9 +1,14 @@
+# -*- coding: utf-8 -*-
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 from flask import Flask, request, jsonify
 import joblib
 import pandas as pd
 import numpy as np
 import os
-import sys
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -228,4 +233,4 @@ def scrape_player():
 
 if __name__ == '__main__':
     print("🚀 ML Servisi 5000 portunda çalışıyor...")
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

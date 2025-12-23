@@ -60,9 +60,9 @@ CREATE TABLE IF NOT EXISTS scoutreports (
     is_approved BOOLEAN DEFAULT FALSE
 );
 
-CREATE TABLE IF NOT EXISTS player_price_log (
+CREATE TABLE IF NOT EXISTS player_price_logs (
     log_id SERIAL PRIMARY KEY,
-    player_id INT REFERENCES players(player_id),
+    player_id INT REFERENCES players(player_id) ON DELETE CASCADE,
     old_value DECIMAL(15, 2),
     new_value DECIMAL(15, 2),
     change_percentage INT,

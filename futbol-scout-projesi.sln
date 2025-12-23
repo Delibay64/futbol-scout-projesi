@@ -2,7 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HashGenerator", "HashGenerator\HashGenerator.csproj", "{EE71756A-CCF3-9954-820B-F535E837FC86}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "web_ui", "web_ui", "{196E8CE0-8B48-878D-E33E-1ECF49AEC761}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoutGrpcService", "web_ui\ScoutGrpcService\ScoutGrpcService.csproj", "{22EE0A94-E5E1-AE41-81C6-F25EC9526D3B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScoutWeb", "web_ui\ScoutWeb\ScoutWeb.csproj", "{C67B72EE-279A-3FD1-9643-D8B868733D01}"
 EndProject
@@ -12,6 +16,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EE71756A-CCF3-9954-820B-F535E837FC86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE71756A-CCF3-9954-820B-F535E837FC86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE71756A-CCF3-9954-820B-F535E837FC86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE71756A-CCF3-9954-820B-F535E837FC86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22EE0A94-E5E1-AE41-81C6-F25EC9526D3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22EE0A94-E5E1-AE41-81C6-F25EC9526D3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22EE0A94-E5E1-AE41-81C6-F25EC9526D3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22EE0A94-E5E1-AE41-81C6-F25EC9526D3B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C67B72EE-279A-3FD1-9643-D8B868733D01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C67B72EE-279A-3FD1-9643-D8B868733D01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C67B72EE-279A-3FD1-9643-D8B868733D01}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -21,9 +33,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{22EE0A94-E5E1-AE41-81C6-F25EC9526D3B} = {196E8CE0-8B48-878D-E33E-1ECF49AEC761}
 		{C67B72EE-279A-3FD1-9643-D8B868733D01} = {196E8CE0-8B48-878D-E33E-1ECF49AEC761}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {6959433F-F550-48CD-A065-D4FC7FFE4A41}
+		SolutionGuid = {BDE1B643-C150-4197-8D49-AC6A4596797C}
 	EndGlobalSection
 EndGlobal

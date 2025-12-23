@@ -14,7 +14,6 @@ using Npgsql;
 namespace ScoutWeb.Controllers
 {
     [Authorize]
-    [Route("Player")]
     public class PlayerController : Controller
     {
         private readonly ScoutDbContext _context;
@@ -34,7 +33,6 @@ namespace ScoutWeb.Controllers
 
         // --- TOPLU DEĞER GÜNCELLEMESİ ---
         [HttpPost]
-        [Route("BulkUpdateValues")]
         // Geçici olarak Admin kontrolü kaldırıldı
         // [Authorize(Roles = "Admin")]
         public async Task<IActionResult> BulkUpdateValues(int percentage)
@@ -104,8 +102,6 @@ namespace ScoutWeb.Controllers
         }
 
         // --- 1. LİSTELEME VE ARAMA SAYFASI ---
-        [Route("")]
-        [Route("Index")]
         public async Task<IActionResult> Index(string searchString)
         {
             // Servis katmanını kullan
@@ -213,6 +209,7 @@ namespace ScoutWeb.Controllers
 
         // --- 5. YAPAY ZEKA FİYAT TAHMİNİ (gRPC → Python ML) ---
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> PredictPrice(int id)
         {
             try
@@ -273,8 +270,9 @@ namespace ScoutWeb.Controllers
             }
         }
 
-        // --- 6. SCRAPER KÖPRÜSÜ (Node.js API üzerinden) ---
+        // --- 6. SCRAPER KÖPRÜSÜ (Python ML Servisi üzerinden) ---
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> FetchPlayerData(string name)
         {
             try
@@ -283,50 +281,23 @@ namespace ScoutWeb.Controllers
                 {
                     client.Timeout = TimeSpan.FromSeconds(10);
 
-                    // Node.js scraper endpoint'ini çağır
-                    var response = await client.GetAsync($"http://localhost:3000/api/scraper/search/{Uri.EscapeDataString(name)}");
+                    // Python scraper endpoint'ini çağır
+                    var payload = new { name = name };
+                    var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync("http://127.0.0.1:5000/scrape_player", jsonContent);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        var jsonResult = await response.Content.ReadAsStringAsync();
-                        var scraperData = JsonSerializer.Deserialize<JsonElement>(jsonResult);
-
-                        // Sonuç var mı kontrol et
-                        if (scraperData.GetProperty("count").GetInt32() == 0)
-                        {
-                            return Json(new
-                            {
-                                status = "error",
-                                message = $"'{name}' için oyuncu bulunamadı."
-                            });
-                        }
-
-                        // İlk sonucu al
-                        var player = scraperData.GetProperty("results")[0];
-
-                        // C# formatına dönüştür
-                        return Json(new
-                        {
-                            status = "success",
-                            FullName = player.GetProperty("name").GetString(),
-                            TeamName = player.GetProperty("team").GetString(),
-                            Position = player.GetProperty("position").GetString(),
-                            Age = player.GetProperty("age").GetInt32(),
-                            CurrentMarketValue = player.GetProperty("marketValue").GetInt32(),
-                            Nationality = player.TryGetProperty("nationality", out var nat) ? nat.GetString() : "Bilinmiyor",
-                            Goals = 0,
-                            Assists = 0,
-                            MatchesPlayed = 0,
-                            MinutesPlayed = 0
-                        });
+                        var result = await response.Content.ReadAsStringAsync();
+                        return Content(result, "application/json");
                     }
                     else
                     {
                         return Json(new
                         {
                             status = "error",
-                            message = "Scraper servisi yanıt vermedi. Node.js API (port 3000) çalışmıyor olabilir.",
-                            hint = "START_NODEJS_API.bat dosyasını çalıştırın."
+                            message = "Python servisi yanıt vermedi. ML servisi (port 5000) çalışmıyor olabilir.",
+                            hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın."
                         });
                     }
                 }
@@ -336,8 +307,18 @@ namespace ScoutWeb.Controllers
                 return Json(new
                 {
                     status = "error",
-                    message = "Node.js API erişilebilir değil.",
-                    hint = "START_NODEJS_API.bat dosyasını çalıştırın.",
+                    message = "Python servisi erişilebilir değil. ML servisi (port 5000) çalışmıyor.",
+                    hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın.",
+                    details = ex.Message
+                });
+            }
+            catch (TaskCanceledException ex)
+            {
+                return Json(new
+                {
+                    status = "error",
+                    message = "Veri çekme servisi zaman aşımına uğradı (10 saniye).",
+                    hint = "Python Flask servisi çalışmıyor veya oyuncu bulunamadı.",
                     details = ex.Message
                 });
             }

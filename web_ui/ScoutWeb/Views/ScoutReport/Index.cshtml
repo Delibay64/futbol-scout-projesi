@@ -55,7 +55,9 @@
                             {
                                 <tr>
                                     <td>
-                                        <strong>@item.Player?.FullName</strong>
+                                        <a href="@Url.Action("Details", "Player", new { id = item.PlayerId })" class="text-decoration-none">
+                                            <strong>@item.Player?.FullName</strong>
+                                        </a>
                                     </td>
                                     <td>@item.Player?.Team?.TeamName</td>
                                     <td>
@@ -80,14 +82,16 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <a asp-action="Details" asp-route-id="@item.ReportId"
-                                               class="btn btn-outline-primary">
+                                            <a href="@Url.Action("Details", "Player", new { id = item.PlayerId })"
+                                               class="btn btn-outline-primary"
+                                               title="Oyuncu Detayı">
                                                 <i class="bi bi-eye"></i>
                                             </a>
                                             <form asp-action="Delete" asp-route-id="@item.ReportId" method="post" style="display:inline"
                                                   onsubmit="return confirm('Bu raporu silmek istediğinize emin misiniz?');">
                                                 @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                        title="Raporu Sil">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

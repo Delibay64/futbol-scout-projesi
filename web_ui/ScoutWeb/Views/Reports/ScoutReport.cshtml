@@ -64,7 +64,7 @@
                                 <tr class="table-warning">
                                     <td><span class="badge bg-warning text-dark">@report.ReportId</span></td>
                                     <td>
-                                        <a asp-controller="Player" asp-action="Details" asp-route-id="@report.PlayerId"
+                                        <a href="@Url.Action("Details", "Player", new { id = report.PlayerId })"
                                            class="text-decoration-none fw-bold">
                                             @report.Player?.FullName
                                         </a>
@@ -152,7 +152,7 @@
                                         <span class="badge bg-secondary">@report.ReportId</span>
                                     </td>
                                     <td>
-                                        <a asp-controller="Player" asp-action="Details" asp-route-id="@report.PlayerId"
+                                        <a href="@Url.Action("Details", "Player", new { id = report.PlayerId })"
                                            class="text-decoration-none fw-bold">
                                             @report.Player?.FullName
                                         </a>
