@@ -211,89 +211,69 @@ namespace ScoutWeb.Controllers
             }
         }
 
-        // --- 5. YAPAY ZEKA FİYAT TAHMİNİ ---
+        // --- 5. YAPAY ZEKA FİYAT TAHMİNİ (gRPC → Python ML) ---
         [HttpPost]
         public async Task<IActionResult> PredictPrice(int id)
         {
-            var player = await _context.Players
-                .Include(p => p.Team)
-                .Include(p => p.Playerstats)
-                .FirstOrDefaultAsync(p => p.PlayerId == id);
-
-            if (player == null) return Json(new { status = "error", message = "Oyuncu bulunamadı." });
-
-            var stats = player.Playerstats.FirstOrDefault();
-            double macBasiSkor = 0;
-            if (stats != null && stats.MatchesPlayed > 0)
-            {
-                macBasiSkor = (double)((stats.Goals ?? 0) + (stats.Assists ?? 0)) / (double)stats.MatchesPlayed;
-            }
-
-            var inputData = new
-            {
-                Oyuncu = player.FullName,
-                Takim = player.Team?.TeamName ?? "Bilinmiyor",
-                Lig = player.Team?.LeagueName ?? "Bilinmiyor",
-                Ana_Mevki = player.Position ?? "Merkez Ortasaha",
-                Ayak = "sag",
-                Yas = player.Age ?? 25,
-                Gol = stats?.Goals ?? 0,
-                Asist = stats?.Assists ?? 0,
-                Oynadigi_Sure_Dk = stats?.MinutesPlayed ?? 0,
-                Mac_Sayisi = stats?.MatchesPlayed ?? 0,
-                Sari_Kart = stats?.YellowCards ?? 0,
-                Ilk_11 = stats?.MatchesPlayed ?? 0,
-                Mac_Basi_Skor_Katkisi = macBasiSkor
-            };
-
             try
             {
-                using (var client = new HttpClient())
-                {
-                    client.Timeout = TimeSpan.FromSeconds(5); // 5 saniye timeout
-                    var jsonContent = new StringContent(JsonSerializer.Serialize(inputData), Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync("http://localhost:5000/predict", jsonContent);
+                // HTTP/2 desteğini aktif et
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-                    if (response.IsSuccessStatusCode)
+                // gRPC kanalı oluştur (HTTP/2 ile)
+                var channel = Grpc.Net.Client.GrpcChannel.ForAddress(
+                    "http://localhost:5001",
+                    new Grpc.Net.Client.GrpcChannelOptions
                     {
-                        var result = await response.Content.ReadAsStringAsync();
-                        return Content(result, "application/json");
-                    }
-                    else
-                    {
-                        return Json(new {
-                            status = "error",
-                            message = "AI servisi yanıt vermedi. Python Flask servisi (localhost:5000) çalışmıyor olabilir.",
-                            hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın."
-                        });
-                    }
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                return Json(new {
-                    status = "error",
-                    message = "AI servisi erişilebilir değil. Python Flask servisi (localhost:5000) çalışmıyor.",
-                    hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın.",
-                    details = ex.Message
+                        HttpHandler = new System.Net.Http.SocketsHttpHandler
+                        {
+                            EnableMultipleHttp2Connections = true,
+                            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+                            KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+                            ConnectTimeout = TimeSpan.FromSeconds(10)
+                        }
+                    });
+
+                var client = new ScoutGrpcService.PlayerService.PlayerServiceClient(channel);
+
+                // gRPC'ye tahmin isteği gönder
+                var request = new ScoutGrpcService.PredictionRequest
+                {
+                    PlayerId = id
+                };
+
+                var response = await client.PredictValueAsync(request);
+
+                await channel.ShutdownAsync();
+
+                return Json(new
+                {
+                    status = response.Status,
+                    tahmini_deger = response.PredictedValue,
+                    message = response.Message
                 });
             }
-            catch (TaskCanceledException ex)
+            catch (Grpc.Core.RpcException ex)
             {
-                return Json(new {
+                return Json(new
+                {
                     status = "error",
-                    message = "AI servisi zaman aşımına uğradı (5 saniye).",
-                    hint = "Python Flask servisi çalışmıyor veya yanıt vermiyor.",
-                    details = ex.Message
+                    message = $"gRPC Hatası: {ex.Status.Detail}",
+                    hint = "gRPC servisi (port 5001) veya Python ML servisi (port 5000) çalışmıyor olabilir."
                 });
             }
             catch (Exception ex)
             {
-                return Json(new { status = "error", message = "Beklenmeyen hata: " + ex.Message });
+                return Json(new
+                {
+                    status = "error",
+                    message = $"Bağlantı hatası: {ex.Message}",
+                    hint = "BASLAT_GRPC.bat ve BASLAT_ML_SERVICE.bat dosyalarını çalıştırın."
+                });
             }
         }
 
-        // --- 6. SCRAPER KÖPRÜSÜ (VERİ ÇEKME) ---
+        // --- 6. SCRAPER KÖPRÜSÜ (Node.js API üzerinden) ---
         [HttpPost]
         public async Task<IActionResult> FetchPlayerData(string name)
         {
@@ -301,48 +281,73 @@ namespace ScoutWeb.Controllers
             {
                 using (var client = new HttpClient())
                 {
-                    client.Timeout = TimeSpan.FromSeconds(10); // 10 saniye timeout (scraping daha uzun sürebilir)
-                    var payload = new { name = name };
-                    var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                    client.Timeout = TimeSpan.FromSeconds(10);
 
-                    var response = await client.PostAsync("http://localhost:5000/scrape_player", jsonContent);
+                    // Node.js scraper endpoint'ini çağır
+                    var response = await client.GetAsync($"http://localhost:3000/api/scraper/search/{Uri.EscapeDataString(name)}");
 
                     if (response.IsSuccessStatusCode)
                     {
-                        var result = await response.Content.ReadAsStringAsync();
-                        return Content(result, "application/json");
+                        var jsonResult = await response.Content.ReadAsStringAsync();
+                        var scraperData = JsonSerializer.Deserialize<JsonElement>(jsonResult);
+
+                        // Sonuç var mı kontrol et
+                        if (scraperData.GetProperty("count").GetInt32() == 0)
+                        {
+                            return Json(new
+                            {
+                                status = "error",
+                                message = $"'{name}' için oyuncu bulunamadı."
+                            });
+                        }
+
+                        // İlk sonucu al
+                        var player = scraperData.GetProperty("results")[0];
+
+                        // C# formatına dönüştür
+                        return Json(new
+                        {
+                            status = "success",
+                            FullName = player.GetProperty("name").GetString(),
+                            TeamName = player.GetProperty("team").GetString(),
+                            Position = player.GetProperty("position").GetString(),
+                            Age = player.GetProperty("age").GetInt32(),
+                            CurrentMarketValue = player.GetProperty("marketValue").GetInt32(),
+                            Nationality = player.TryGetProperty("nationality", out var nat) ? nat.GetString() : "Bilinmiyor",
+                            Goals = 0,
+                            Assists = 0,
+                            MatchesPlayed = 0,
+                            MinutesPlayed = 0
+                        });
                     }
                     else
                     {
-                        return Json(new {
+                        return Json(new
+                        {
                             status = "error",
-                            message = "Veri çekme servisi yanıt vermedi. Python Flask servisi (localhost:5000) çalışmıyor olabilir.",
-                            hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın."
+                            message = "Scraper servisi yanıt vermedi. Node.js API (port 3000) çalışmıyor olabilir.",
+                            hint = "START_NODEJS_API.bat dosyasını çalıştırın."
                         });
                     }
                 }
             }
             catch (HttpRequestException ex)
             {
-                return Json(new {
+                return Json(new
+                {
                     status = "error",
-                    message = "Veri çekme servisi erişilebilir değil. Python Flask servisi (localhost:5000) çalışmıyor.",
-                    hint = "ml_service klasöründe 'python ai_service.py' komutu ile servisi başlatın.",
-                    details = ex.Message
-                });
-            }
-            catch (TaskCanceledException ex)
-            {
-                return Json(new {
-                    status = "error",
-                    message = "Veri çekme servisi zaman aşımına uğradı (10 saniye).",
-                    hint = "Python Flask servisi çalışmıyor veya oyuncu bulunamadı.",
+                    message = "Node.js API erişilebilir değil.",
+                    hint = "START_NODEJS_API.bat dosyasını çalıştırın.",
                     details = ex.Message
                 });
             }
             catch (Exception ex)
             {
-                return Json(new { status = "error", message = "Beklenmeyen hata: " + ex.Message });
+                return Json(new
+                {
+                    status = "error",
+                    message = $"Hata: {ex.Message}"
+                });
             }
         }
 
@@ -550,18 +555,28 @@ namespace ScoutWeb.Controllers
 
                 string playerName = player.FullName ?? "Bilinmeyen Oyuncu";
 
-                // Önce ilişkili kayıtları sil
+                // Önce ilişkili kayıtları sil (Foreign Key Constraint için)
+
+                // 1. PlayerPriceLogs silme
+                var priceLogs = await _context.PriceLogs
+                    .Where(pl => pl.PlayerId == id)
+                    .ToListAsync();
+                if (priceLogs.Any())
+                {
+                    _context.PriceLogs.RemoveRange(priceLogs);
+                }
+
+                // 2. Playerstats silme
                 if (player.Playerstats != null && player.Playerstats.Any())
                 {
                     _context.Playerstats.RemoveRange(player.Playerstats);
                 }
 
+                // 3. Scoutreports silme
                 if (player.Scoutreports != null && player.Scoutreports.Any())
                 {
                     _context.Scoutreports.RemoveRange(player.Scoutreports);
                 }
-
-                // PlayerPriceLogs tablosu yok, kaldırıldı
 
                 // Sonra oyuncuyu sil
                 _context.Players.Remove(player);
@@ -574,6 +589,58 @@ namespace ScoutWeb.Controllers
             {
                 TempData["Error"] = $"Silme işlemi başarısız: {ex.InnerException?.Message ?? ex.Message}";
                 return RedirectToAction("Index");
+            }
+        }
+
+        // --- ML TAHMİN ENDPOİNTİ (gRPC üzerinden) ---
+        [HttpPost]
+        [Route("PredictPrice")]
+        public async Task<IActionResult> PredictPriceViaGrpc(int id)
+        {
+            try
+            {
+                // HTTP/2 desteğini aktif et
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+                // gRPC kanalı oluştur (HTTP/2 ile)
+                var channel = Grpc.Net.Client.GrpcChannel.ForAddress(
+                    "http://localhost:5001",
+                    new Grpc.Net.Client.GrpcChannelOptions
+                    {
+                        HttpHandler = new System.Net.Http.SocketsHttpHandler
+                        {
+                            EnableMultipleHttp2Connections = true,
+                            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+                            KeepAlivePingTimeout = TimeSpan.FromSeconds(30)
+                        }
+                    });
+
+                var client = new ScoutGrpcService.PlayerService.PlayerServiceClient(channel);
+
+                // gRPC'ye tahmin isteği gönder
+                var request = new ScoutGrpcService.PredictionRequest
+                {
+                    PlayerId = id
+                };
+
+                var response = await client.PredictValueAsync(request);
+
+                await channel.ShutdownAsync();
+
+                return Json(new
+                {
+                    status = response.Status,
+                    tahmini_deger = response.PredictedValue,
+                    message = response.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = "error",
+                    message = ex.Message
+                });
             }
         }
     }

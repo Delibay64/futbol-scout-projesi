@@ -17,10 +17,34 @@
     <part name="marketValue" type="xsd:string"/>
   </message>
 
+  <message name="ValidateExchangeRateRequest">
+    <part name="fromCurrency" type="xsd:string"/>
+    <part name="toCurrency" type="xsd:string"/>
+    <part name="providedRate" type="xsd:string"/>
+  </message>
+
+  <message name="ValidateExchangeRateResponse">
+    <part name="isValid" type="xsd:boolean"/>
+    <part name="message" type="xsd:string"/>
+    <part name="actualRate" type="xsd:string"/>
+    <part name="difference" type="xsd:string"/>
+    <part name="percentageDiff" type="xsd:string"/>
+    <part name="status" type="xsd:string"/>
+    <part name="timestamp" type="xsd:string"/>
+    <part name="lastUpdate" type="xsd:string"/>
+    <part name="providedRate" type="xsd:string"/>
+    <part name="currencyPair" type="xsd:string"/>
+    <part name="source" type="xsd:string"/>
+  </message>
+
   <portType name="PlayerPortType">
     <operation name="GetPlayer">
       <input message="tns:GetPlayerRequest"/>
       <output message="tns:GetPlayerResponse"/>
+    </operation>
+    <operation name="ValidateExchangeRate">
+      <input message="tns:ValidateExchangeRateRequest"/>
+      <output message="tns:ValidateExchangeRateResponse"/>
     </operation>
   </portType>
 
@@ -28,6 +52,15 @@
     <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
     <operation name="GetPlayer">
       <soap:operation soapAction="GetPlayer"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="ValidateExchangeRate">
+      <soap:operation soapAction="ValidateExchangeRate"/>
       <input>
         <soap:body use="literal"/>
       </input>

@@ -41,12 +41,6 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-success fw-bold" asp-controller="Integration" asp-action="Index">
-                                <i class="bi bi-diagram-3"></i> SOA Entegrasyonları
-                            </a>
-                        </li>
-
                         @* Sadece "admin" kullanıcısı görebilir *@
                         @if (Context.Session.GetString("Username") == "admin")
                         {

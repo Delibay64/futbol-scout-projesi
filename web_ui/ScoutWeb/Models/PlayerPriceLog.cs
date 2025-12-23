@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ScoutWeb.Models
 {
-    [Table("player_price_log")] // SQL'deki tablo adımız (tekil)
+    [Table("player_price_logs")] // SQL'deki tablo adımız (çoğul)
     public class PlayerPriceLog
     {
         [Key]

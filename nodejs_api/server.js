@@ -111,17 +111,46 @@ app.get('/api/teams', async (req, res) => {
     const result = await pool.query(
       'SELECT team_id, team_name, league_name FROM teams ORDER BY team_name LIMIT 50'
     );
-    res.json({ 
-      status: 'success', 
+    res.json({
+      status: 'success',
       count: result.rows.length,
-      teams: result.rows 
+      teams: result.rows
     });
   } catch (error) {
     console.error('Hata:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
- 
+
+// SCRAPER: Transfermarkt'tan oyuncu ara
+app.get('/api/scraper/search/:playerName', async (req, res) => {
+  try {
+    const { playerName } = req.params;
+    console.log(`🔍 Scraper: "${playerName}" aranıyor...`);
+
+    // Mock data (gerçek scraper için puppeteer/cheerio kullanılabilir)
+    const mockPlayers = [
+      { name: 'Cristiano Ronaldo', team: 'Al-Nassr', league: 'Saudi Pro League', position: 'Forvet', age: 39, marketValue: 15000000, nationality: 'Portekiz' },
+      { name: 'Lionel Messi', team: 'Inter Miami', league: 'MLS', position: 'Sağ Kanat', age: 36, marketValue: 35000000, nationality: 'Arjantin' },
+      { name: 'Kylian Mbappé', team: 'Real Madrid', league: 'LaLiga', position: 'Sol Kanat', age: 25, marketValue: 180000000, nationality: 'Fransa' }
+    ];
+
+    const results = mockPlayers.filter(p => p.name.toLowerCase().includes(playerName.toLowerCase()));
+
+    res.json({
+      status: 'success',
+      query: playerName,
+      count: results.length,
+      results: results,
+      source: 'Mock Data (Demo)',
+      note: 'Gerçek scraper için Transfermarkt entegrasyonu eklenebilir'
+    });
+  } catch (error) {
+    console.error('Scraper hatası:', error);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
 // HAZIR API: OpenWeatherMap - Hava Durumu (DEMO VERSION)
 app.get('/api/weather/:city', async (req, res) => {
   try {
@@ -160,40 +189,68 @@ app.get('/api/weather/:city', async (req, res) => {
   }
 });
 
-// Döviz Kuru API (DEMO VERSION)
+// Döviz Kuru API (GERÇEK API KEY - CANLI VERİ)
 app.get('/api/exchange/:from/:to', async (req, res) => {
   try {
     const { from, to } = req.params;
-
-    // SOA demonstration için mock data
-    const mockRates = {
-      'EUR': { 'TRY': 36.85, 'USD': 1.08, 'GBP': 0.85 },
-      'USD': { 'TRY': 34.12, 'EUR': 0.93, 'GBP': 0.79 },
-      'GBP': { 'TRY': 43.20, 'EUR': 1.18, 'USD': 1.27 }
-    };
-
+    const API_KEY = 'd1894d2d40ca978d85376110';
     const fromUpper = from.toUpperCase();
     const toUpper = to.toUpperCase();
 
-    if (!mockRates[fromUpper] || !mockRates[fromUpper][toUpper]) {
-      return res.status(404).json({
+    console.log(`💱 Döviz Kuru İsteği: ${fromUpper}/${toUpper}`);
+
+    // Gerçek API'den veri çek (HER ZAMAN GÜNCEL)
+    const fetch = (await import('node-fetch')).default;
+    const apiUrl = `https://v6.exchangerate-api.com/v6/${API_KEY}/pair/${fromUpper}/${toUpper}`;
+
+    console.log(`🌐 API Çağrısı: ${apiUrl}`);
+
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      console.error(`❌ API Hatası: ${response.status} ${response.statusText}`);
+      return res.status(500).json({
         status: 'error',
-        message: 'Döviz çifti bulunamadı. Desteklenen: EUR, USD, GBP'
+        message: `ExchangeRate API hatası: ${response.statusText}`,
+        hint: 'API key kontrol edin veya quota aşıldı'
       });
     }
 
+    const data = await response.json();
+
+    if (data.result === 'error') {
+      console.error(`❌ API Yanıt Hatası: ${data['error-type']}`);
+      return res.status(400).json({
+        status: 'error',
+        message: data['error-type'],
+        hint: 'Döviz çifti geçersiz veya desteklenmiyor'
+      });
+    }
+
+    const currentRate = data.conversion_rate;
+    const lastUpdate = data.time_last_update_utc;
+
+    console.log(`✅ Güncel Kur: 1 ${fromUpper} = ${currentRate} ${toUpper}`);
+    console.log(`🕒 Son Güncelleme: ${lastUpdate}`);
+
     res.json({
       status: 'success',
-      base_code: fromUpper,
-      target_code: toUpper,
-      conversion_rate: mockRates[fromUpper][toUpper],
-      time_last_update_utc: new Date().toISOString(),
-      source: 'ExchangeRate API (Demo)',
-      note: 'SOA entegrasyonu demonstration - Gerçek API için kendi key\'inizi kullanın'
+      base_code: data.base_code,
+      target_code: data.target_code,
+      conversion_rate: currentRate,
+      time_last_update_utc: lastUpdate,
+      time_next_update_utc: data.time_next_update_utc,
+      source: 'ExchangeRate API',
+      type: 'CANLI VERİ - Gerçek Zamanlı',
+      note: `Son güncelleme: ${new Date(lastUpdate).toLocaleString('tr-TR')}`
     });
   } catch (error) {
-    console.error('Döviz kuru hatası:', error);
-    res.status(500).json({ status: 'error', message: error.message });
+    console.error('💥 Döviz kuru hatası:', error);
+    res.status(500).json({
+      status: 'error',
+      message: error.message,
+      hint: 'İnternet bağlantısı veya API servisi kontrol edin'
+    });
   }
 });
 
@@ -210,7 +267,7 @@ const playerService = {
              WHERE p.player_id = $1`,
             [playerId]
           );
-          
+
           if (result.rows.length === 0) {
             return {
               fullName: 'Bulunamadı',
@@ -219,7 +276,7 @@ const playerService = {
               marketValue: '0'
             };
           }
-          
+
           const player = result.rows[0];
           return {
             fullName: player.full_name || 'Bilinmiyor',
@@ -234,6 +291,103 @@ const playerService = {
             position: 'N/A',
             age: 0,
             marketValue: '0'
+          };
+        }
+      },
+
+      // YENİ: Döviz kuru doğrulama servisi (GERÇEK ZAMANLI)
+      ValidateExchangeRate: async function(args) {
+        try {
+          const { fromCurrency, toCurrency, providedRate } = args;
+          const API_KEY = 'd1894d2d40ca978d85376110';
+          const fromUpper = fromCurrency.toUpperCase();
+          const toUpper = toCurrency.toUpperCase();
+          const providedNum = parseFloat(providedRate);
+
+          console.log(`\n🔍 SOAP DOĞRULAMA İSTEĞİ:`);
+          console.log(`   Döviz Çifti: ${fromUpper}/${toUpper}`);
+          console.log(`   Gönderilen Oran: ${providedNum}`);
+
+          // Gerçek API'den güncel veriyi çek
+          const fetch = (await import('node-fetch')).default;
+          const apiUrl = `https://v6.exchangerate-api.com/v6/${API_KEY}/pair/${fromUpper}/${toUpper}`;
+
+          console.log(`🌐 SOAP için API Çağrısı: ${apiUrl}`);
+
+          const response = await fetch(apiUrl);
+
+          if (!response.ok) {
+            console.error(`❌ SOAP API Hatası: ${response.status} ${response.statusText}`);
+            return {
+              isValid: false,
+              message: `API çağrısı başarısız: ${response.statusText}`,
+              actualRate: '0',
+              difference: '0',
+              percentageDiff: '0',
+              status: 'error',
+              timestamp: new Date().toISOString(),
+              lastUpdate: 'Bilinmiyor'
+            };
+          }
+
+          const data = await response.json();
+
+          if (data.result === 'error') {
+            console.error(`❌ SOAP API Yanıt Hatası: ${data['error-type']}`);
+            return {
+              isValid: false,
+              message: `API hatası: ${data['error-type']}`,
+              actualRate: '0',
+              difference: '0',
+              percentageDiff: '0',
+              status: 'error',
+              timestamp: new Date().toISOString(),
+              lastUpdate: 'Bilinmiyor'
+            };
+          }
+
+          const actualRate = data.conversion_rate;
+          const difference = Math.abs(actualRate - providedNum);
+          const percentageDiff = ((difference / actualRate) * 100).toFixed(2);
+          const tolerance = actualRate * 0.01; // %1 tolerans
+          const isValid = difference <= tolerance;
+          const lastUpdate = data.time_last_update_utc;
+
+          console.log(`\n💱 CANLI KUR BİLGİSİ:`);
+          console.log(`   Güncel Oran: 1 ${fromUpper} = ${actualRate} ${toUpper}`);
+          console.log(`   Gönderilen: ${providedNum}`);
+          console.log(`   Fark: ${difference.toFixed(4)} (${percentageDiff}%)`);
+          console.log(`   Tolerans: ±${tolerance.toFixed(4)} (%1)`);
+          console.log(`   Durum: ${isValid ? '✅ GEÇERLİ' : '❌ GEÇERSİZ'}`);
+          console.log(`   Son Güncelleme: ${lastUpdate}`);
+          console.log(`   Türkçe Zaman: ${new Date(lastUpdate).toLocaleString('tr-TR')}\n`);
+
+          return {
+            isValid: isValid,
+            message: isValid
+              ? `✅ Kur doğrulandı! Fark sadece ${percentageDiff}% (Tolerans: %1)`
+              : `❌ Kur güncel değil! Fark ${percentageDiff}% (Tolerans aşıldı)`,
+            actualRate: actualRate.toString(),
+            difference: difference.toFixed(4),
+            percentageDiff: percentageDiff,
+            status: 'success',
+            timestamp: new Date().toISOString(),
+            lastUpdate: new Date(lastUpdate).toLocaleString('tr-TR'),
+            providedRate: providedNum.toString(),
+            currencyPair: `${fromUpper}/${toUpper}`,
+            source: 'ExchangeRate API (CANLI VERİ)'
+          };
+        } catch (error) {
+          console.error('💥 SOAP Doğrulama Hatası:', error);
+          return {
+            isValid: false,
+            message: `Hata: ${error.message}`,
+            actualRate: '0',
+            difference: '0',
+            percentageDiff: '0',
+            status: 'error',
+            timestamp: new Date().toISOString(),
+            lastUpdate: 'Bilinmiyor'
           };
         }
       }

@@ -139,8 +139,8 @@ public partial class ScoutDbContext : DbContext
 
         modelBuilder.Entity<PlayerPriceLog>(entity =>
         {
-            entity.HasKey(e => e.LogId).HasName("player_price_log_pkey");
-            entity.ToTable("player_price_log");
+            entity.HasKey(e => e.LogId).HasName("player_price_logs_pkey");
+            entity.ToTable("player_price_logs"); // Database'de çoğul
 
             entity.Property(e => e.LogId).HasColumnName("log_id");
             entity.Property(e => e.PlayerId).HasColumnName("player_id");
@@ -152,7 +152,7 @@ public partial class ScoutDbContext : DbContext
             entity.HasOne(d => d.Player).WithMany(p => p.PlayerPriceLogs)
                 .HasForeignKey(d => d.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("player_price_log_player_id_fkey");
+                .HasConstraintName("player_price_logs_player_id_fkey"); // Database constraint ismi
         });
 
         // --- 3. POSTGRESQL VERİTABANI VIEW'LARI ---

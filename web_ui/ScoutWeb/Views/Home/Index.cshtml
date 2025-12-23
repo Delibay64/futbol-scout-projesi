@@ -46,6 +46,37 @@
         </div>
     </div>
 
+    <!-- Gerçek Zamanlı Döviz Kuru -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-2 text-center">
+                            <i class="bi bi-currency-exchange" style="font-size: 3rem;"></i>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h5 class="mb-1">
+                                        <i class="bi bi-broadcast"></i> Canlı Döviz Kuru
+                                    </h5>
+                                    <small id="exchangeUpdateTime">Yükleniyor...</small>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="display-6 fw-bold" id="exchangeRate">
+                                        <span class="spinner-border spinner-border-sm"></span>
+                                    </div>
+                                    <small>1 EUR = ? TRY</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- İstatistikler ve ViewComponent -->
     <div class="row">
         <!-- Sol Kolon: Özellikler -->
@@ -201,3 +232,43 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        // Gerçek zamanlı döviz kuru çekme
+        async function loadExchangeRate() {
+            try {
+                const response = await fetch('http://localhost:3000/api/exchange/EUR/TRY');
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    const rate = data.conversion_rate;
+                    const lastUpdate = data.note || data.time_last_update_utc;
+
+                    // Kur bilgisini güncelle
+                    document.getElementById('exchangeRate').innerHTML =
+                        `₺${rate.toFixed(2)}`;
+
+                    // Güncelleme zamanını göster
+                    document.getElementById('exchangeUpdateTime').innerHTML =
+                        `<i class="bi bi-clock"></i> ${lastUpdate}`;
+                } else {
+                    throw new Error(data.message || 'Veri çekilemedi');
+                }
+            } catch (error) {
+                console.error('Döviz kuru hatası:', error);
+                document.getElementById('exchangeRate').innerHTML =
+                    '<small class="text-warning">Bağlantı hatası</small>';
+                document.getElementById('exchangeUpdateTime').innerHTML =
+                    '<small>Node.js API çalışmıyor olabilir</small>';
+            }
+        }
+
+        // Sayfa yüklendiğinde çalıştır
+        document.addEventListener('DOMContentLoaded', loadExchangeRate);
+
+        // Her 60 saniyede bir güncelle
+        setInterval(loadExchangeRate, 60000);
+    </script>
+}
+
