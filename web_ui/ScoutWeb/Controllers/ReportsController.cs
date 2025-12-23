@@ -38,7 +38,16 @@ namespace ScoutWeb.Controllers
                     .Take(10)
                     .ToListAsync();
 
+                // ✅ SCOUT RAPORLARI - Onay Bekleyenler (Admin için)
+                var pendingReports = await _context.Scoutreports
+                    .Include(r => r.Player)
+                    .Include(r => r.User)
+                    .Where(r => !r.IsApproved) // Onaylanmamış raporlar
+                    .OrderByDescending(r => r.ReportDate)
+                    .ToListAsync();
+
                 ViewBag.TopScorers = topScorers;
+                ViewBag.PendingReports = pendingReports;
 
                 return View(playerDetails);
             }
@@ -254,6 +263,76 @@ namespace ScoutWeb.Controllers
             }
 
             return RedirectToAction("ScoutReport");
+        }
+
+        // --- FIX: SCOUT REPORT STORED PROCEDURES ---
+        [HttpGet]
+        public async Task<IActionResult> FixScoutReportProcedures()
+        {
+            if (HttpContext.Session.GetString("Username") != "admin")
+            {
+                TempData["Error"] = "Bu işlem için yetkiniz yok!";
+                return RedirectToAction("Index", "Home");
+            }
+
+            try
+            {
+                // ÖNCE TÜM OLASI HATALILARI TEMİZLE (Gemini'nin farklı varyasyonları)
+                await _context.Database.ExecuteSqlRawAsync(@"
+DROP PROCEDURE IF EXISTS sp_approvescoutreport(integer);
+DROP PROCEDURE IF EXISTS sp_ApprovescoutReport(integer);
+DROP PROCEDURE IF EXISTS ""sp_ApproveScoutReport""(integer);
+DROP PROCEDURE IF EXISTS sp_rejectscoutreport(integer);
+DROP PROCEDURE IF EXISTS sp_RejectscoutReport(integer);
+DROP PROCEDURE IF EXISTS ""sp_RejectScoutReport""(integer);");
+
+                // 1. sp_ApproveScoutReport oluştur (DOĞRU TABLO ADI: scoutreports - küçük harf)
+                await _context.Database.ExecuteSqlRawAsync(@"
+CREATE OR REPLACE PROCEDURE sp_ApproveScoutReport(
+    p_report_id INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE scoutreports
+    SET is_approved = TRUE
+    WHERE report_id = p_report_id;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'Rapor ID % bulunamadı', p_report_id;
+    ELSE
+        RAISE NOTICE 'Scout raporu onaylandı: Rapor ID %', p_report_id;
+    END IF;
+END;
+$$;");
+
+                // 2. sp_RejectScoutReport oluştur (DOĞRU TABLO ADI: scoutreports - küçük harf)
+                await _context.Database.ExecuteSqlRawAsync(@"
+CREATE OR REPLACE PROCEDURE sp_RejectScoutReport(
+    p_report_id INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    DELETE FROM scoutreports
+    WHERE report_id = p_report_id;
+
+    IF NOT FOUND THEN
+        RAISE NOTICE 'Rapor ID % bulunamadı', p_report_id;
+    ELSE
+        RAISE NOTICE 'Scout raporu reddedildi ve silindi: Rapor ID %', p_report_id;
+    END IF;
+END;
+$$;");
+
+                TempData["Success"] = "✓ Scout Report Stored Procedures başarıyla oluşturuldu!";
+                return RedirectToAction("AdminDashboard");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Hata: {ex.Message}";
+                return RedirectToAction("AdminDashboard");
+            }
         }
     }
 }

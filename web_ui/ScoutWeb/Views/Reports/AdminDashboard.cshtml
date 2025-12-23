@@ -4,6 +4,7 @@
     ViewData["Title"] = "Yönetici Raporları";
     // Controller'dan ViewBag ile gelen golcü listesini yakalıyoruz
     var scorers = ViewBag.TopScorers as List<ScoutWeb.Models.TopScorerView>;
+    var pendingReports = ViewBag.PendingReports as List<ScoutWeb.Models.Scoutreport>;
 }
 
 <div class="container mt-4">
@@ -138,6 +139,85 @@
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scout Raporları - Onay Bekleyenler -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow border-0">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📋 Scout Raporları - Onay Bekleyenler</h5>
+                    <span class="badge bg-light text-dark">
+                        @(pendingReports?.Count ?? 0) Rapor Bekliyor
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    @if (pendingReports != null && pendingReports.Count > 0)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Rapor ID</th>
+                                        <th>Oyuncu</th>
+                                        <th>Scout</th>
+                                        <th>Tahmin Edilen Değer</th>
+                                        <th>Notlar</th>
+                                        <th>Tarih</th>
+                                        <th>İşlemler</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var report in pendingReports)
+                                    {
+                                        <tr>
+                                            <td><strong>#@report.ReportId</strong></td>
+                                            <td>
+                                                <strong>@report.Player?.FullName</strong>
+                                                <div class="text-muted small">@report.Player?.Position</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">@report.User?.Username</span>
+                                            </td>
+                                            <td class="text-success fw-bold">
+                                                €@(report.PredictedValue?.ToString("N0") ?? "0")
+                                            </td>
+                                            <td>
+                                                <small>@(report.Notes?.Length > 50 ? report.Notes.Substring(0, 50) + "..." : report.Notes)</small>
+                                            </td>
+                                            <td>
+                                                <small>@report.ReportDate?.ToString("dd.MM.yyyy HH:mm")</small>
+                                            </td>
+                                            <td>
+                                                <form asp-controller="Reports" asp-action="ApproveReport" method="post" class="d-inline">
+                                                    <input type="hidden" name="reportId" value="@report.ReportId" />
+                                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Bu raporu onaylamak istediğinizden emin misiniz?')">
+                                                        <i class="bi bi-check-circle"></i> Onayla
+                                                    </button>
+                                                </form>
+                                                <form asp-controller="Reports" asp-action="RejectReport" method="post" class="d-inline">
+                                                    <input type="hidden" name="reportId" value="@report.ReportId" />
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bu raporu reddetmek ve silmek istediğinizden emin misiniz?')">
+                                                        <i class="bi bi-x-circle"></i> Reddet
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                            <p class="mt-3">Onay bekleyen rapor bulunmuyor.</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

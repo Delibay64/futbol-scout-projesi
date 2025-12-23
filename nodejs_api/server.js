@@ -30,7 +30,6 @@ app.get('/api', (req, res) => {
     port: PORT,
     endpoints: {
       players: '/api/players',
-      weather: '/api/weather/:city',
       exchange: '/api/exchange/:from/:to',
       soap: '/soap?wsdl'
     }
@@ -147,44 +146,6 @@ app.get('/api/scraper/search/:playerName', async (req, res) => {
     });
   } catch (error) {
     console.error('Scraper hatası:', error);
-    res.status(500).json({ status: 'error', message: error.message });
-  }
-});
-
-// HAZIR API: OpenWeatherMap - Hava Durumu (DEMO VERSION)
-app.get('/api/weather/:city', async (req, res) => {
-  try {
-    const { city } = req.params;
-
-    // SOA demonstration için mock data kullanıyoruz
-    // Gerçek projelerde buraya kendi API key'inizi koyun
-    const mockWeatherData = {
-      'Istanbul': { temp: 15, feels_like: 13, humidity: 72, description: 'parçalı bulutlu' },
-      'Ankara': { temp: 8, feels_like: 5, humidity: 65, description: 'açık' },
-      'Izmir': { temp: 18, feels_like: 17, humidity: 68, description: 'güneşli' },
-      'London': { temp: 12, feels_like: 10, humidity: 80, description: 'yağmurlu' },
-      'Madrid': { temp: 20, feels_like: 19, humidity: 55, description: 'güneşli' }
-    };
-
-    const weatherData = mockWeatherData[city] || mockWeatherData['Istanbul'];
-
-    res.json({
-      status: 'success',
-      name: city,
-      main: {
-        temp: weatherData.temp,
-        feels_like: weatherData.feels_like,
-        humidity: weatherData.humidity,
-        pressure: 1013
-      },
-      weather: [{
-        description: weatherData.description
-      }],
-      source: 'OpenWeatherMap API (Demo)',
-      note: 'SOA entegrasyonu demonstration - Gerçek API için kendi key\'inizi kullanın'
-    });
-  } catch (error) {
-    console.error('Hava durumu hatası:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
@@ -406,7 +367,6 @@ app.listen(PORT, () => {
   console.log('='.repeat(60));
   console.log(`✅ REST API: http://localhost:${PORT}`);
   console.log(`📊 Oyuncular: http://localhost:${PORT}/api/players`);
-  console.log(`🌤️  Hava Durumu: http://localhost:${PORT}/api/weather/Istanbul`);
   console.log(`💱 Döviz Kuru: http://localhost:${PORT}/api/exchange/EUR/TRY`);
 
   // SOAP servisi başlat
