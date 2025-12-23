@@ -1,0 +1,338 @@
+@{
+    ViewData["Title"] = "SOAP Web Service Demo";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="text-info">
+                <i class="bi bi-cloud"></i> SOAP Protokolü Entegrasyonu
+            </h2>
+            <p class="text-muted">Simple Object Access Protocol (SOAP) ile Oyuncu Bilgisi Sorgulama</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <!-- SOAP Response (Live Data) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            @if (ViewBag.SoapStatus == "success")
+            {
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <strong>Başarılı!</strong> SOAP servisinden veri çekildi.
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-envelope"></i> SOAP Response (XML)
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <pre class="mb-0" style="max-height: 400px; overflow-y: auto; background: #f5f5f5; padding: 1rem; border-radius: 5px;"><code>@ViewBag.SoapResponse</code></pre>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Veri Akışı:</strong> PostgreSQL → Node.js SOAP Service → ASP.NET Core (HTTP POST) → XML Response
+                        </small>
+                    </div>
+                </div>
+            }
+            else if (ViewBag.SoapStatus == "error")
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Hata!</strong> @ViewBag.ErrorMessage
+                    <hr>
+                    <small>Node.js API çalışmıyor olabilir. <code>START_NODEJS_API.bat</code> dosyasını çalıştırın.</small>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- SOAP Nedir? -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle"></i> SOAP Protokolü Nedir?
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>SOAP (Simple Object Access Protocol)</strong>, XML tabanlı bir mesajlaşma protokolüdür.</p>
+                    <ul class="mb-0">
+                        <li><strong>Format:</strong> XML (Katı şema kontrolü)</li>
+                        <li><strong>Protokol:</strong> HTTP/HTTPS, SMTP</li>
+                        <li><strong>WSDL:</strong> Web Services Description Language</li>
+                        <li><strong>Kullanım:</strong> Bankacılık, kurumsal sistemler</li>
+                        <li><strong>Güvenlik:</strong> WS-Security standardı</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-diagram-3"></i> SOAP vs REST
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th width="33%"></th>
+                                <th class="bg-info text-white">SOAP</th>
+                                <th class="bg-success text-white">REST</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Format</th>
+                                <td>XML</td>
+                                <td>JSON, XML</td>
+                            </tr>
+                            <tr>
+                                <th>Protokol</th>
+                                <td>HTTP, SMTP, TCP</td>
+                                <td>HTTP</td>
+                            </tr>
+                            <tr>
+                                <th>Hız</th>
+                                <td>Yavaş</td>
+                                <td>Hızlı</td>
+                            </tr>
+                            <tr>
+                                <th>Güvenlik</th>
+                                <td>WS-Security</td>
+                                <td>HTTPS, OAuth</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WSDL Endpoint -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-warning">
+                    <h6 class="mb-0">
+                        <i class="bi bi-file-earmark-code"></i> WSDL (Web Services Description Language)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>WSDL URL:</strong>
+                        <a href="@ViewBag.SoapEndpoint" target="_blank" class="text-decoration-none">
+                            <code>@ViewBag.SoapEndpoint</code>
+                            <i class="bi bi-box-arrow-up-right ms-2"></i>
+                        </a>
+                    </p>
+                    <p class="text-muted small mb-0">
+                        WSDL dosyası, SOAP servisinin hangi methodları desteklediğini, parametrelerini ve dönüş tiplerini tanımlar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAP İstek/Cevap Örneği -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-arrow-up"></i> SOAP Request (İstek)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0" style="font-size: 0.75rem; max-height: 350px; overflow-y: auto;"><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;soap:Envelope
+  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+  xmlns:tns="http://localhost:3000/wsdl"&gt;
+
+  &lt;soap:Body&gt;
+    &lt;tns:GetPlayer&gt;
+      &lt;tns:playerId&gt;1&lt;/tns:playerId&gt;
+    &lt;/tns:GetPlayer&gt;
+  &lt;/soap:Body&gt;
+
+&lt;/soap:Envelope&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-arrow-down"></i> SOAP Response (Cevap)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0" style="font-size: 0.75rem; max-height: 350px; overflow-y: auto;"><code>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;soap:Envelope
+  xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"&gt;
+
+  &lt;soap:Body&gt;
+    &lt;GetPlayerResponse&gt;
+      &lt;player&gt;
+        &lt;player_id&gt;1&lt;/player_id&gt;
+        &lt;full_name&gt;Lionel Messi&lt;/full_name&gt;
+        &lt;position&gt;RW&lt;/position&gt;
+        &lt;age&gt;36&lt;/age&gt;
+        &lt;current_market_value&gt;35000000&lt;/current_market_value&gt;
+      &lt;/player&gt;
+    &lt;/GetPlayerResponse&gt;
+  &lt;/soap:Body&gt;
+
+&lt;/soap:Envelope&gt;</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Node.js SOAP Server Kodu -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-code-slash"></i> Node.js SOAP Server Implementation
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0" style="font-size: 0.8rem; max-height: 400px; overflow-y: auto;"><code>// server.js (Node.js)
+const soap = require('soap');
+
+// WSDL tanımı
+const wsdlDefinition = `
+&lt;definitions name="PlayerService"
+  targetNamespace="http://localhost:3000/wsdl"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"&gt;
+
+  &lt;message name="GetPlayerRequest"&gt;
+    &lt;part name="playerId" type="xsd:int"/&gt;
+  &lt;/message&gt;
+
+  &lt;message name="GetPlayerResponse"&gt;
+    &lt;part name="player" type="tns:Player"/&gt;
+  &lt;/message&gt;
+
+  &lt;portType name="PlayerPortType"&gt;
+    &lt;operation name="GetPlayer"&gt;
+      &lt;input message="tns:GetPlayerRequest"/&gt;
+      &lt;output message="tns:GetPlayerResponse"/&gt;
+    &lt;/operation&gt;
+  &lt;/portType&gt;
+&lt;/definitions&gt;
+`;
+
+// SOAP Servisi
+const playerService = {
+  PlayerService: {
+    PlayerPort: {
+      GetPlayer: async function(args) {
+        const playerId = args.playerId;
+
+        // PostgreSQL'den oyuncu getir
+        const result = await pool.query(
+          'SELECT * FROM Players WHERE player_id = $1',
+          [playerId]
+        );
+
+        return {
+          player: result.rows[0]
+        };
+      }
+    }
+  }
+};
+
+// SOAP sunucusunu başlat
+soap.listen(app, '/soap', playerService, wsdlDefinition);</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Aracı -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-play-circle"></i> SOAP Servisini Test Et
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">SOAP servisini test etmek için aşağıdaki araçları kullanabilirsiniz:</p>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-browser-chrome display-4 text-primary"></i>
+                                    <h6 class="mt-3">SoapUI</h6>
+                                    <p class="small text-muted">En popüler SOAP test aracı</p>
+                                    <a href="https://www.soapui.org/downloads/soapui/" target="_blank" class="btn btn-sm btn-primary">
+                                        İndir <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-lightning display-4 text-warning"></i>
+                                    <h6 class="mt-3">Postman</h6>
+                                    <p class="small text-muted">SOAP ve REST desteği</p>
+                                    <a href="https://www.postman.com/" target="_blank" class="btn btn-sm btn-warning">
+                                        İndir <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-code-square display-4 text-success"></i>
+                                    <h6 class="mt-3">cURL</h6>
+                                    <p class="small text-muted">Komut satırı test</p>
+                                    <code class="small">curl -X POST ...</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bilgilendirme -->
+    <div class="alert alert-info mt-4">
+        <h6 class="alert-heading">
+            <i class="bi bi-info-circle"></i> Kullanım Notu
+        </h6>
+        <ul class="mb-0">
+            <li><strong>Node.js API</strong> çalışıyor olmalı (<code>START_NODEJS_API.bat</code>)</li>
+            <li>WSDL dosyasını görüntülemek için yukarıdaki linke tıklayın</li>
+            <li>C# ile SOAP client oluşturmak için: <code>Add Service Reference</code> kullanabilirsiniz</li>
+            <li>Modern projelerde genellikle REST tercih edilir, SOAP kurumsal sistemlerde kullanılır</li>
+        </ul>
+    </div>
+</div>

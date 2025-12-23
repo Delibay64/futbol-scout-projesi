@@ -1,0 +1,123 @@
+@{
+    ViewData["Title"] = "SOA Entegrasyonları";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-primary">
+                <i class="bi bi-diagram-3"></i> SOA Entegrasyonları
+            </h2>
+            <p class="text-muted">Servis Odaklı Mimari (SOA) ve Harici API Entegrasyonları</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- 1. Node.js REST API -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-server"></i> Node.js REST API
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Port:</strong> 3000<br>
+                        <strong>Teknoloji:</strong> Express.js + PostgreSQL<br>
+                        <strong>Endpoints:</strong> /api/players, /api/teams
+                    </p>
+                    <p class="text-muted small">
+                        ASP.NET Core MVC uygulamasından Node.js REST API'ye HTTP GET/POST çağrıları.
+                    </p>
+                    <a asp-action="NodeApiDemo" class="btn btn-success w-100">
+                        <i class="bi bi-eye"></i> Demo'yu Gör
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SOAP Protokolü -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cloud"></i> SOAP Web Service
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Endpoint:</strong> http://localhost:3000/soap<br>
+                        <strong>WSDL:</strong> ?wsdl<br>
+                        <strong>Method:</strong> GetPlayer(playerId)
+                    </p>
+                    <p class="text-muted small">
+                        SOAP (Simple Object Access Protocol) ile oyuncu bilgisi çekme.
+                    </p>
+                    <a asp-action="SoapDemo" class="btn btn-info w-100">
+                        <i class="bi bi-eye"></i> Demo'yu Gör
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. gRPC Protokolü -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightning"></i> gRPC Service
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Port:</strong> 5001<br>
+                        <strong>Proto:</strong> Player.proto<br>
+                        <strong>RPC:</strong> GetPlayer, PredictValue
+                    </p>
+                    <p class="text-muted small">
+                        Google Remote Procedure Call (gRPC) ile yüksek performanslı veri transferi.
+                    </p>
+                    <a asp-action="GrpcDemo" class="btn btn-warning w-100">
+                        <i class="bi bi-eye"></i> Demo'yu Gör
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Hazır API'ler -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-globe"></i> Hazır API Kullanımı
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>1.</strong> OpenWeatherMap API (Hava Durumu)<br>
+                        <strong>2.</strong> ExchangeRate API (Döviz Kuru)
+                    </p>
+                    <p class="text-muted small">
+                        Node.js üzerinden proxy edilmiş harici API çağrıları.
+                    </p>
+                    <a asp-action="ExternalApisDemo" class="btn btn-primary w-100">
+                        <i class="bi bi-eye"></i> Demo'yu Gör
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bilgilendirme -->
+    <div class="alert alert-info mt-4">
+        <h6 class="alert-heading">
+            <i class="bi bi-info-circle"></i> Kullanım Notu
+        </h6>
+        <ul class="mb-0">
+            <li><strong>Node.js API</strong> için <code>START_NODEJS_API.bat</code> dosyasını çalıştırın</li>
+            <li><strong>gRPC Service</strong> için <code>ScoutGrpcService</code> projesini başlatın</li>
+            <li>Tüm servisler çalışmıyorsa demo'lar hata verebilir</li>
+        </ul>
+    </div>
+</div>

@@ -56,7 +56,8 @@ CREATE TABLE IF NOT EXISTS scoutreports (
     player_id INT REFERENCES players(player_id),
     predicted_value DECIMAL(15, 2),
     notes TEXT,
-    report_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    report_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_approved BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS player_price_log (

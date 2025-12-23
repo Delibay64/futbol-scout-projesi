@@ -1,0 +1,235 @@
+@{
+    ViewData["Title"] = "Hazır API Kullanımı";
+}
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="text-primary">
+                <i class="bi bi-globe"></i> Hazır API Entegrasyonu
+            </h2>
+            <p class="text-muted">OpenWeatherMap + ExchangeRate API → Node.js → ASP.NET Core</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Geri Dön
+            </a>
+        </div>
+    </div>
+
+    <!-- Hava Durumu API -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cloud-sun"></i> 1. OpenWeatherMap API
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.WeatherStatus == "success")
+                    {
+                        var weather = ViewBag.WeatherData;
+                        var hasMain = weather.TryGetProperty("main", out System.Text.Json.JsonElement mainElement);
+                        var hasWeather = weather.TryGetProperty("weather", out System.Text.Json.JsonElement weatherElement);
+                        var hasName = weather.TryGetProperty("name", out System.Text.Json.JsonElement nameElement);
+
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center">
+                                @if (hasMain)
+                                {
+                                    var temp = mainElement.GetProperty("temp").GetDouble();
+                                    <h1 class="display-3 text-primary mb-0">
+                                        @Math.Round(temp, 1)°C
+                                    </h1>
+                                }
+                                @if (hasWeather && weatherElement.GetArrayLength() > 0)
+                                {
+                                    var desc = weatherElement[0].GetProperty("description").GetString();
+                                    <p class="text-muted">@desc</p>
+                                }
+                            </div>
+                            <div class="col-md-8">
+                                @if (hasMain)
+                                {
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th width="40%">Şehir</th>
+                                            <td><strong>@(hasName ? nameElement.GetString() : "-")</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <th>Hissedilen Sıcaklık</th>
+                                            <td>@Math.Round(mainElement.GetProperty("feels_like").GetDouble(), 1)°C</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Nem</th>
+                                            <td>%@mainElement.GetProperty("humidity").GetInt32()</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Basınç</th>
+                                            <td>@mainElement.GetProperty("pressure").GetInt32() hPa</td>
+                                        </tr>
+                                    </table>
+                                }
+                            </div>
+                        </div>
+
+                        <hr>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Veri Akışı:</strong> OpenWeatherMap API → Node.js (Proxy) → ASP.NET Core → View
+                        </small>
+                    }
+                    else if (ViewBag.WeatherStatus == "error")
+                    {
+                        <div class="alert alert-danger mb-0">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Hata!</strong> @ViewBag.WeatherError
+                            <hr>
+                            <small>Node.js API çalışmıyor olabilir veya OpenWeatherMap API anahtarı geçersiz.</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning mb-0">
+                            <i class="bi bi-hourglass-split"></i> Veri yükleniyor...
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Döviz Kuru API -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-currency-exchange"></i> 2. ExchangeRate API
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (ViewBag.ExchangeStatus == "success")
+                    {
+                        var exchange = ViewBag.ExchangeData;
+                        var hasConversion = exchange.TryGetProperty("conversion_rate", out System.Text.Json.JsonElement rateElement);
+                        var hasBase = exchange.TryGetProperty("base_code", out System.Text.Json.JsonElement baseElement);
+                        var hasTarget = exchange.TryGetProperty("target_code", out System.Text.Json.JsonElement targetElement);
+
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center">
+                                @if (hasConversion)
+                                {
+                                    <h1 class="display-4 text-success mb-0">
+                                        ₺@Math.Round(rateElement.GetDouble(), 2)
+                                    </h1>
+                                    <p class="text-muted">1 EUR = ? TRY</p>
+                                }
+                            </div>
+                            <div class="col-md-8">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th width="40%">Kaynak Para</th>
+                                        <td>@(hasBase ? baseElement.GetString() : "-") (Euro)</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Hedef Para</th>
+                                        <td>@(hasTarget ? targetElement.GetString() : "-") (Türk Lirası)</td>
+                                    </tr>
+                                    @if (hasConversion)
+                                    {
+                                        <tr>
+                                            <th>100 EUR</th>
+                                            <td class="text-success fw-bold">₺@Math.Round(rateElement.GetDouble() * 100, 2)</td>
+                                        </tr>
+                                        <tr>
+                                            <th>1000 EUR</th>
+                                            <td class="text-success fw-bold">₺@String.Format("{0:N2}", rateElement.GetDouble() * 1000)</td>
+                                        </tr>
+                                    }
+                                </table>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Veri Akışı:</strong> ExchangeRate-API.com → Node.js (Proxy) → ASP.NET Core → View
+                        </small>
+                    }
+                    else if (ViewBag.ExchangeStatus == "error")
+                    {
+                        <div class="alert alert-danger mb-0">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Hata!</strong> @ViewBag.ExchangeError
+                            <hr>
+                            <small>Node.js API çalışmıyor olabilir veya ExchangeRate API'ye erişim sağlanamıyor.</small>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning mb-0">
+                            <i class="bi bi-hourglass-split"></i> Veri yükleniyor...
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teknik Detaylar -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-code-slash"></i> OpenWeatherMap Endpoint
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0" style="font-size: 0.85rem;"><code>// Node.js Proxy Endpoint
+GET http://localhost:3000/api/weather/{city}
+
+// Gerçek API
+https://api.openweathermap.org/data/2.5/weather
+  ?q={city}
+  &appid={API_KEY}
+  &units=metric
+  &lang=tr</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-code-slash"></i> ExchangeRate Endpoint
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <pre class="mb-0" style="font-size: 0.85rem;"><code>// Node.js Proxy Endpoint
+GET http://localhost:3000/api/exchange/{from}/{to}
+
+// Gerçek API
+https://v6.exchangerate-api.com/v6/{API_KEY}
+  /pair/{from}/{to}</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kullanım Bilgisi -->
+    <div class="alert alert-info mt-4">
+        <h6 class="alert-heading">
+            <i class="bi bi-lightbulb"></i> Neden Node.js Üzerinden?
+        </h6>
+        <ul class="mb-0">
+            <li><strong>API Anahtarı Güvenliği:</strong> API anahtarları backend'de saklanır, frontend'e açılmaz</li>
+            <li><strong>Rate Limiting:</strong> Tüm istekler tek bir yerden kontrol edilir</li>
+            <li><strong>Caching:</strong> Sık kullanılan veriler cache'lenebilir</li>
+            <li><strong>CORS Sorunları:</strong> Cross-origin istekler proxy ile çözülür</li>
+        </ul>
+    </div>
+</div>

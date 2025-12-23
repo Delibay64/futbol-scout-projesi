@@ -17,6 +17,10 @@ builder.Services.AddDbContext<ScoutDbContext>(options =>
     builder.Services.AddScoped<IPlayerService, PlayerService>();
     builder.Services.AddScoped<IValidationService, ValidationService>();
 
+// --- SOA ENTEGRASYON: HttpClientFactory ---
+// Node.js API, SOAP, REST çağrıları için gerekli
+builder.Services.AddHttpClient();
+
 // --- 2. SESSION YAPILANDIRMASI ---
 // Session kullanmak için gerekli (Admin paneli role kontrolü için)
 builder.Services.AddDistributedMemoryCache(); // Session için in-memory cache

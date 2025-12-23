@@ -1,0 +1,124 @@
+@model ScoutWeb.Models.Scoutreport
+
+@{
+    ViewData["Title"] = "Yeni Scout Raporu";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="mb-4">
+                <h2 class="text-success">
+                    <i class="bi bi-file-earmark-plus"></i> Yeni Scout Raporu
+                </h2>
+                <p class="text-muted">Oyuncu değerlendirme raporu oluşturun</p>
+            </div>
+
+            <div class="mb-3">
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Raporlarıma Dön
+                </a>
+            </div>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i> @TempData["Error"]
+                </div>
+            }
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clipboard"></i> Rapor Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <!-- Oyuncu Seçimi -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-person"></i> Oyuncu
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            @if (ViewBag.PlayerId != null)
+                            {
+                                <input type="hidden" asp-for="PlayerId" value="@ViewBag.PlayerId" />
+                                <input type="text" class="form-control" value="@ViewBag.PlayerName" readonly />
+                            }
+                            else
+                            {
+                                <select asp-for="PlayerId" class="form-select" required>
+                                    <option value="">-- Oyuncu Seçin --</option>
+                                    @foreach (var player in (List<ScoutWeb.Models.Player>)ViewBag.Players)
+                                    {
+                                        <option value="@player.PlayerId">
+                                            @player.FullName (@player.Position) - @player.Team?.TeamName
+                                        </option>
+                                    }
+                                </select>
+                            }
+                            <span asp-validation-for="PlayerId" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Tahmin Edilen Değer -->
+                        <div class="mb-4">
+                            <label asp-for="PredictedValue" class="form-label fw-bold">
+                                <i class="bi bi-currency-euro"></i> Tahmin Edilen Piyasa Değeri (€)
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="PredictedValue" type="number" class="form-control form-control-lg"
+                                   placeholder="Örn: 5000000" required step="0.01" />
+                            <span asp-validation-for="PredictedValue" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                Oyuncunun tahmini piyasa değerini Euro cinsinden girin
+                            </small>
+                        </div>
+
+                        <!-- Notlar -->
+                        <div class="mb-4">
+                            <label asp-for="Notes" class="form-label fw-bold">
+                                <i class="bi bi-card-text"></i> Değerlendirme Notları
+                            </label>
+                            <textarea asp-for="Notes" class="form-control" rows="8"
+                                      placeholder="Oyuncunun güçlü yönleri, zayıf yönleri, potansiyeli hakkında notlarınız..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger small"></span>
+                            <small class="form-text text-muted">
+                                Oyuncu hakkında detaylı değerlendirmenizi yazın
+                            </small>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Butonlar -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                                <i class="bi bi-x-circle"></i> İptal
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Raporu Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        <span class="text-danger">*</span> işaretli alanlar zorunludur
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

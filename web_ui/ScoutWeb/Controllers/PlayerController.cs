@@ -14,6 +14,7 @@ using Npgsql;
 namespace ScoutWeb.Controllers
 {
     [Authorize]
+    [Route("Player")]
     public class PlayerController : Controller
     {
         private readonly ScoutDbContext _context;
@@ -33,6 +34,7 @@ namespace ScoutWeb.Controllers
 
         // --- TOPLU DEĞER GÜNCELLEMESİ ---
         [HttpPost]
+        [Route("BulkUpdateValues")]
         // Geçici olarak Admin kontrolü kaldırıldı
         // [Authorize(Roles = "Admin")]
         public async Task<IActionResult> BulkUpdateValues(int percentage)
@@ -102,6 +104,8 @@ namespace ScoutWeb.Controllers
         }
 
         // --- 1. LİSTELEME VE ARAMA SAYFASI ---
+        [Route("")]
+        [Route("Index")]
         public async Task<IActionResult> Index(string searchString)
         {
             // Servis katmanını kullan
@@ -109,6 +113,7 @@ namespace ScoutWeb.Controllers
             return View(players);
         }
 
+        [Route("Details/{id?}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -159,6 +164,7 @@ namespace ScoutWeb.Controllers
         }
 
         // --- 3. YENİ OYUNCU EKLEME (SAYFAYI AÇ) ---
+        [Route("Create")]
         public IActionResult Create()
         {
             ViewBag.Teams = _context.Teams.ToList();
@@ -167,7 +173,8 @@ namespace ScoutWeb.Controllers
 
         // --- 4. YENİ OYUNCU KAYDETME ---
         [HttpPost]
-[ValidateAntiForgeryToken]
+        [Route("Create")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Player player, string? NewTeamName)
         {
             try
@@ -524,6 +531,7 @@ namespace ScoutWeb.Controllers
 
         // --- DELETE İŞLEMİ ---
         [HttpPost]
+        [Route("Delete/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
@@ -532,7 +540,6 @@ namespace ScoutWeb.Controllers
                 var player = await _context.Players
                     .Include(p => p.Playerstats)
                     .Include(p => p.Scoutreports)
-                    .Include(p => p.PlayerPriceLogs)
                     .FirstOrDefaultAsync(p => p.PlayerId == id);
 
                 if (player == null)
@@ -554,10 +561,7 @@ namespace ScoutWeb.Controllers
                     _context.Scoutreports.RemoveRange(player.Scoutreports);
                 }
 
-                if (player.PlayerPriceLogs != null && player.PlayerPriceLogs.Any())
-                {
-                    _context.PriceLogs.RemoveRange(player.PlayerPriceLogs);
-                }
+                // PlayerPriceLogs tablosu yok, kaldırıldı
 
                 // Sonra oyuncuyu sil
                 _context.Players.Remove(player);

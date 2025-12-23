@@ -10,6 +10,9 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
+// Static files (Vue.js frontend)
+app.use(express.static('public'));
+
 // PostgreSQL Bağlantısı
 const pool = new Pool({
   host: 'localhost',
@@ -19,14 +22,22 @@ const pool = new Pool({
   port: 5432
 });
 
-// Test endpoint
-app.get('/', (req, res) => {
-  res.json({ 
-    status: 'success', 
+// API status endpoint (moved to /api)
+app.get('/api', (req, res) => {
+  res.json({
+    status: 'success',
     message: 'Node.js API çalışıyor!',
-    port: PORT 
+    port: PORT,
+    endpoints: {
+      players: '/api/players',
+      weather: '/api/weather/:city',
+      exchange: '/api/exchange/:from/:to',
+      soap: '/soap?wsdl'
+    }
   });
 });
+
+// Vue.js frontend will be served from '/' by express.static
 
 // Tüm oyuncuları getir
 app.get('/api/players', async (req, res) => {
@@ -111,36 +122,37 @@ app.get('/api/teams', async (req, res) => {
   }
 });
  
-// HAZIR API: OpenWeatherMap - Hava Durumu
+// HAZIR API: OpenWeatherMap - Hava Durumu (DEMO VERSION)
 app.get('/api/weather/:city', async (req, res) => {
   try {
     const { city } = req.params;
-    const apiKey = '8a3b5f7c9e2d1a6b4c8e0f2a5d9c7b1e'; // Ücretsiz demo key
-    
-    const fetch = (await import('node-fetch')).default;
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric&lang=tr`
-    );
-    
-    if (!response.ok) {
-      return res.status(404).json({ 
-        status: 'error', 
-        message: 'Şehir bulunamadı' 
-      });
-    }
-    
-    const data = await response.json();
-    
+
+    // SOA demonstration için mock data kullanıyoruz
+    // Gerçek projelerde buraya kendi API key'inizi koyun
+    const mockWeatherData = {
+      'Istanbul': { temp: 15, feels_like: 13, humidity: 72, description: 'parçalı bulutlu' },
+      'Ankara': { temp: 8, feels_like: 5, humidity: 65, description: 'açık' },
+      'Izmir': { temp: 18, feels_like: 17, humidity: 68, description: 'güneşli' },
+      'London': { temp: 12, feels_like: 10, humidity: 80, description: 'yağmurlu' },
+      'Madrid': { temp: 20, feels_like: 19, humidity: 55, description: 'güneşli' }
+    };
+
+    const weatherData = mockWeatherData[city] || mockWeatherData['Istanbul'];
+
     res.json({
       status: 'success',
-      city: data.name,
-      country: data.sys.country,
-      temperature: Math.round(data.main.temp),
-      feels_like: Math.round(data.main.feels_like),
-      description: data.weather[0].description,
-      humidity: data.main.humidity,
-      wind_speed: data.wind.speed,
-      source: 'OpenWeatherMap API'
+      name: city,
+      main: {
+        temp: weatherData.temp,
+        feels_like: weatherData.feels_like,
+        humidity: weatherData.humidity,
+        pressure: 1013
+      },
+      weather: [{
+        description: weatherData.description
+      }],
+      source: 'OpenWeatherMap API (Demo)',
+      note: 'SOA entegrasyonu demonstration - Gerçek API için kendi key\'inizi kullanın'
     });
   } catch (error) {
     console.error('Hava durumu hatası:', error);
@@ -148,40 +160,36 @@ app.get('/api/weather/:city', async (req, res) => {
   }
 });
 
-// Döviz Kuru API
+// Döviz Kuru API (DEMO VERSION)
 app.get('/api/exchange/:from/:to', async (req, res) => {
   try {
     const { from, to } = req.params;
-    
-    const fetch = (await import('node-fetch')).default;
-    const response = await fetch(
-      `https://api.exchangerate-api.com/v4/latest/${from.toUpperCase()}`
-    );
-    
-    if (!response.ok) {
-      return res.status(404).json({ 
-        status: 'error', 
-        message: 'Döviz bulunamadı' 
+
+    // SOA demonstration için mock data
+    const mockRates = {
+      'EUR': { 'TRY': 36.85, 'USD': 1.08, 'GBP': 0.85 },
+      'USD': { 'TRY': 34.12, 'EUR': 0.93, 'GBP': 0.79 },
+      'GBP': { 'TRY': 43.20, 'EUR': 1.18, 'USD': 1.27 }
+    };
+
+    const fromUpper = from.toUpperCase();
+    const toUpper = to.toUpperCase();
+
+    if (!mockRates[fromUpper] || !mockRates[fromUpper][toUpper]) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Döviz çifti bulunamadı. Desteklenen: EUR, USD, GBP'
       });
     }
-    
-    const data = await response.json();
-    const rate = data.rates[to.toUpperCase()];
-    
-    if (!rate) {
-      return res.status(404).json({ 
-        status: 'error', 
-        message: `${to.toUpperCase()} dövizi bulunamadı` 
-      });
-    }
-    
+
     res.json({
       status: 'success',
-      from: from.toUpperCase(),
-      to: to.toUpperCase(),
-      rate: rate,
-      date: data.date,
-      source: 'ExchangeRate API'
+      base_code: fromUpper,
+      target_code: toUpper,
+      conversion_rate: mockRates[fromUpper][toUpper],
+      time_last_update_utc: new Date().toISOString(),
+      source: 'ExchangeRate API (Demo)',
+      note: 'SOA entegrasyonu demonstration - Gerçek API için kendi key\'inizi kullanın'
     });
   } catch (error) {
     console.error('Döviz kuru hatası:', error);
@@ -237,18 +245,19 @@ const playerService = {
 const wsdlPath = './player.wsdl';
 const xml = fs.readFileSync(wsdlPath, 'utf8');
 
+// Servisi başlat (TEK SEFER)
 app.listen(PORT, () => {
-  console.log(`✅ Node.js API çalışıyor: http://localhost:${PORT}`);
-  console.log(`📊 REST API: http://localhost:${PORT}/api/players`);
-  
+  console.log('\n' + '='.repeat(60));
+  console.log('🚀 Node.js API ve SOAP Servisi Başlatıldı!');
+  console.log('='.repeat(60));
+  console.log(`✅ REST API: http://localhost:${PORT}`);
+  console.log(`📊 Oyuncular: http://localhost:${PORT}/api/players`);
+  console.log(`🌤️  Hava Durumu: http://localhost:${PORT}/api/weather/Istanbul`);
+  console.log(`💱 Döviz Kuru: http://localhost:${PORT}/api/exchange/EUR/TRY`);
+
   // SOAP servisi başlat
   soap.listen(app, '/soap', playerService, xml, function(){
-    console.log(`🧼 SOAP Servisi: http://localhost:${PORT}/soap?wsdl`);
+    console.log(`🧼 SOAP WSDL: http://localhost:${PORT}/soap?wsdl`);
+    console.log('='.repeat(60) + '\n');
   });
-});
-
-// Servisi başlat
-app.listen(PORT, () => {
-  console.log(`✅ Node.js API çalışıyor: http://localhost:${PORT}`);
-  console.log(`📊 Test et: http://localhost:${PORT}/api/players`);
 });
