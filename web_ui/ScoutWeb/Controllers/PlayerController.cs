@@ -538,14 +538,9 @@ namespace ScoutWeb.Controllers
 
                 // Önce ilişkili kayıtları sil (Foreign Key Constraint için)
 
-                // 1. PlayerPriceLogs silme
-                var priceLogs = await _context.PriceLogs
-                    .Where(pl => pl.PlayerId == id)
-                    .ToListAsync();
-                if (priceLogs.Any())
-                {
-                    _context.PriceLogs.RemoveRange(priceLogs);
-                }
+                // 1. PlayerPriceLogs silme - Direkt SQL kullan
+                await _context.Database.ExecuteSqlRawAsync(
+                    "DELETE FROM player_price_logs WHERE player_id = {0}", id);
 
                 // 2. Playerstats silme
                 if (player.Playerstats != null && player.Playerstats.Any())
