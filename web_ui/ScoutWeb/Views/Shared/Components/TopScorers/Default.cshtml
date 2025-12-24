@@ -5,12 +5,12 @@
     Dinamik olarak en iyi golcüleri listeler
 *@
 
-<div class="card border-0 shadow-sm">
-    <div class="card-header bg-success text-white">
-        <h5 class="mb-0">
+<div class="card border-0 hover-lift" style="background: white;">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+        <h5 class="mb-1 d-flex align-items-center gap-2">
             <i class="bi bi-trophy-fill"></i> En İyi Golcüler
         </h5>
-        <small>İlk @ViewBag.Count Sıra</small>
+        <small class="opacity-75">İlk @ViewBag.Count Sıra</small>
     </div>
     <div class="card-body p-0">
         @if (Model != null && Model.Any())

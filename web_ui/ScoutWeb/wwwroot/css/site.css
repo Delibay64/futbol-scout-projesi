@@ -1,59 +1,504 @@
-/* GENEL SAYFA ARKA PLANI */
+/* ========================================
+   MODERN FUTBOL SCOUT UYGULAMASI CSS
+   ======================================== */
+
+/* --- ROOT VARIABLES --- */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --dark-gradient: linear-gradient(135deg, #2d3561 0%, #c05c7e 100%);
+    --card-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    --hover-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- GENEL SAYFA ARKA PLANI --- */
 body {
-    background-color: #f4f6f9; /* Hafif gri/buz mavisi (Profesyonel durur) */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #495057;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #2d3748;
+    line-height: 1.6;
+    margin-bottom: 80px;
 }
 
-/* HEADER (MENÜ) AYARI */
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+/* --- HEADER --- */
 header {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-/* LİSTELEME TABLOSU İÇİN ÖZEL TASARIM */
-/* Tabloyu bir kart gibi gösterelim */
+/* Modern Navbar */
+.navbar {
+    backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%) !important;
+    padding: 1rem 0;
+    transition: var(--transition);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    transition: var(--transition);
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.nav-link {
+    font-weight: 500;
+    position: relative;
+    transition: var(--transition);
+    margin: 0 0.5rem;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #ffc107;
+    transition: var(--transition);
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+    width: 80%;
+}
+
+/* --- KARTLAR --- */
+.card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 1.25rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* --- TABLOLAR --- */
+.table-responsive {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    background: white;
+}
+
 .table {
-    background-color: #ffffff; /* Tablo bembeyaz olsun */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* Arkasına hafif gölge atalım */
-    border-radius: 12px; /* Köşeleri yuvarlayalım */
-    overflow: hidden; /* Köşelerin düzgün görünmesi için */
-    margin-top: 1rem;
+    background-color: #ffffff;
+    box-shadow: none;
+    border-radius: 0;
+    margin: 0;
 }
 
-/* Tablo Başlığı (Koyu Lacivert - Futbol Temasına Uygun) */
 .table thead {
-    background-color: #212529; 
+    background: linear-gradient(135deg, #2d3561 0%, #3d4574 100%);
     color: #ffffff;
 }
 
-/* Tablo Satırları (Üzerine gelince renk değişsin) */
+.table thead th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 1rem;
+    border: none;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table-hover tbody tr {
+    transition: var(--transition);
+}
+
 .table-hover tbody tr:hover {
-    background-color: #e2e6ea;
-    transition: 0.3s;
+    background: linear-gradient(90deg, #f8f9ff 0%, #fff 100%);
+    transform: scale(1.01);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
 }
 
-/* BUTONLAR */
+/* --- BUTONLAR --- */
 .btn {
-    border-radius: 50px; /* Butonları daha modern (yuvarlak) yapalım */
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 0.6rem 1.5rem;
+    transition: var(--transition);
+    border: none;
+    position: relative;
+    overflow: hidden;
 }
 
-/* --- FOOTER DÜZELTME --- */
-html {
-  position: relative;
-  min-height: 100%;
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
 }
 
-body {
-  /* Footer'ın yüksekliği kadar alttan boşluk bırakıyoruz ki içerik footer'ın altına girmesin */
-  margin-bottom: 60px; 
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
+.btn-primary {
+    background: var(--primary-gradient);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.btn-success {
+    background: var(--success-gradient);
+    box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(17, 153, 142, 0.5);
+}
+
+.btn-danger {
+    background: var(--danger-gradient);
+    box-shadow: 0 4px 15px rgba(235, 51, 73, 0.4);
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(235, 51, 73, 0.5);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.5);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+}
+
+.btn-info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 172, 254, 0.5);
+}
+
+.btn-sm {
+    padding: 0.4rem 1rem;
+    font-size: 0.875rem;
+}
+
+.btn-lg {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+}
+
+/* --- BADGES --- */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* --- FORM ELEMENTLERI --- */
+.form-control,
+.form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+    background: white;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+/* --- ALERTLER --- */
+.alert {
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+    color: #155724;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #721c24;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+    color: #004085;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #856404;
+}
+
+/* --- FOOTER --- */
 footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px; /* Dikey ortalama */
-  background-color: #f8f9fa; /* Hafif gri arka plan */
-  z-index: 10; /* En üstte görünsün ama içeriği ezmesin */
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 1.5rem 0;
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+    color: #cbd5e0;
+    border-top: 3px solid #667eea;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+}
+
+footer .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- MODAL --- */
+.modal-content {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.modal-header {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 1.5rem;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.modal-footer {
+    border: none;
+    padding: 1.5rem;
+    background: #f8f9fa;
+}
+
+/* --- ANIMASYONLAR --- */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* --- SAYFA YÜKLENME ANIMASYONU --- */
+.page-content {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+/* --- CONTAINER --- */
+.container {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* --- ÖZEL YARDIMCI SINIFLAR --- */
+.gradient-text {
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.hover-lift {
+    transition: var(--transition);
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1.5rem;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+
+    .table {
+        font-size: 0.9rem;
+    }
+}
+
+/* --- SCROLLBAR --- */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+/* --- HERO SECTION --- */
+.hero-section {
+    background: var(--primary-gradient);
+    color: white;
+    padding: 3rem 0;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.hero-section h1 {
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* --- STATISTIK KARTLARI --- */
+.stat-card {
+    text-align: center;
+    padding: 2rem;
+    border-radius: 16px;
+    background: white;
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: var(--hover-shadow);
+}
+
+.stat-card .stat-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card .stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-card .stat-label {
+    color: #718096;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
 }

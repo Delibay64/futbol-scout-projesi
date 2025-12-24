@@ -11,33 +11,33 @@
     <!-- Hero Section -->
     <div class="row mb-5">
         <div class="col-lg-12">
-            <div class="card border-0 shadow-sm bg-gradient bg-primary text-white">
-                <div class="card-body py-5 text-center">
-                    <h1 class="display-4 fw-bold mb-3">
+            <div class="hero-section text-center">
+                <div class="container">
+                    <h1 class="display-3 fw-bold mb-3 animate__animated animate__fadeInDown">
                         <i class="bi bi-trophy-fill"></i> Futbol Scout Sistemi
                     </h1>
-                    <p class="lead mb-4">
+                    <p class="lead mb-4 fs-4">
                         Oyuncu yeteneklerini keşfedin, istatistikleri analiz edin ve raporlarınızı oluşturun
                     </p>
                     @if (User.Identity != null && User.Identity.IsAuthenticated)
                     {
-                        <div class="d-flex gap-3 justify-content-center">
-                            <a asp-controller="Player" asp-action="Index" class="btn btn-light btn-lg">
-                                <i class="bi bi-people"></i> Oyuncular
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a asp-controller="Player" asp-action="Index" class="btn btn-light btn-lg shadow">
+                                <i class="bi bi-people-fill"></i> Oyuncular
                             </a>
                             <a asp-controller="Teams" asp-action="Index" class="btn btn-outline-light btn-lg">
-                                <i class="bi bi-shield"></i> Takımlar
+                                <i class="bi bi-shield-fill"></i> Takımlar
                             </a>
                         </div>
                     }
                     else
                     {
-                        <div class="d-flex gap-3 justify-content-center">
-                            <a asp-controller="Account" asp-action="Login" class="btn btn-warning btn-lg">
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-warning btn-lg shadow">
                                 <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
                             </a>
                             <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">
-                                <i class="bi bi-person-plus"></i> Kayıt Ol
+                                <i class="bi bi-person-plus-fill"></i> Kayıt Ol
                             </a>
                         </div>
                     }
@@ -49,25 +49,27 @@
     <!-- Gerçek Zamanlı Döviz Kuru -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm bg-success text-white">
-                <div class="card-body py-3">
+            <div class="card border-0 shadow hover-lift" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <div class="card-body py-4 text-white">
                     <div class="row align-items-center">
-                        <div class="col-md-2 text-center">
-                            <i class="bi bi-currency-exchange" style="font-size: 3rem;"></i>
+                        <div class="col-lg-2 col-md-3 text-center mb-3 mb-md-0">
+                            <i class="bi bi-currency-exchange" style="font-size: 4rem; opacity: 0.9;"></i>
                         </div>
-                        <div class="col-md-10">
+                        <div class="col-lg-10 col-md-9">
                             <div class="row align-items-center">
-                                <div class="col-md-8">
-                                    <h5 class="mb-1">
-                                        <i class="bi bi-broadcast"></i> Canlı Döviz Kuru
-                                    </h5>
-                                    <small id="exchangeUpdateTime">Yükleniyor...</small>
+                                <div class="col-md-7">
+                                    <h4 class="mb-2 fw-bold">
+                                        <i class="bi bi-broadcast-pin"></i> Canlı Döviz Kuru
+                                    </h4>
+                                    <small id="exchangeUpdateTime" class="opacity-75">
+                                        <i class="bi bi-clock-history"></i> Yükleniyor...
+                                    </small>
                                 </div>
-                                <div class="col-md-4 text-end">
-                                    <div class="display-6 fw-bold" id="exchangeRate">
+                                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                                    <div class="display-5 fw-bold mb-1" id="exchangeRate">
                                         <span class="spinner-border spinner-border-sm"></span>
                                     </div>
-                                    <small>1 EUR = ? TRY</small>
+                                    <div class="opacity-75">1 EUR = ? TRY</div>
                                 </div>
                             </div>
                         </div>
@@ -81,21 +83,23 @@
     <div class="row">
         <!-- Sol Kolon: Özellikler -->
         <div class="col-lg-8 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="bi bi-star-fill text-warning"></i> Sistem Özellikleri
+            <div class="card border-0 h-100 hover-lift">
+                <div class="card-header text-white">
+                    <h5 class="mb-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-stars"></i> Sistem Özellikleri
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="d-flex align-items-start">
+                            <div class="d-flex align-items-start p-3 rounded hover-lift" style="background: linear-gradient(135deg, #f8f9ff 0%, #fff 100%);">
                                 <div class="flex-shrink-0">
-                                    <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h6 class="fw-bold">Oyuncu Yönetimi</h6>
+                                    <h6 class="fw-bold mb-2">Oyuncu Yönetimi</h6>
                                     <p class="text-muted small mb-0">
                                         Oyuncu profilleri, istatistikler ve performans takibi
                                     </p>
@@ -104,12 +108,14 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="d-flex align-items-start">
+                            <div class="d-flex align-items-start p-3 rounded hover-lift" style="background: linear-gradient(135deg, #f0fff4 0%, #fff 100%);">
                                 <div class="flex-shrink-0">
-                                    <i class="bi bi-graph-up text-success" style="font-size: 2rem;"></i>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                    </div>
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h6 class="fw-bold">Detaylı İstatistikler</h6>
+                                    <h6 class="fw-bold mb-2">Detaylı İstatistikler</h6>
                                     <p class="text-muted small mb-0">
                                         Gol, asist, kart ve maç istatistikleri
                                     </p>
@@ -118,12 +124,14 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="d-flex align-items-start">
+                            <div class="d-flex align-items-start p-3 rounded hover-lift" style="background: linear-gradient(135deg, #f0f9ff 0%, #fff 100%);">
                                 <div class="flex-shrink-0">
-                                    <i class="bi bi-file-earmark-text text-info" style="font-size: 2rem;"></i>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-file-text-fill"></i>
+                                    </div>
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h6 class="fw-bold">Scout Raporları</h6>
+                                    <h6 class="fw-bold mb-2">Scout Raporları</h6>
                                     <p class="text-muted small mb-0">
                                         Detaylı oyuncu değerlendirme raporları oluşturun
                                     </p>
@@ -132,12 +140,14 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="d-flex align-items-start">
+                            <div class="d-flex align-items-start p-3 rounded hover-lift" style="background: linear-gradient(135deg, #fffbeb 0%, #fff 100%);">
                                 <div class="flex-shrink-0">
-                                    <i class="bi bi-shield-fill text-warning" style="font-size: 2rem;"></i>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-shield-fill-check"></i>
+                                    </div>
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h6 class="fw-bold">Takım Yönetimi</h6>
+                                    <h6 class="fw-bold mb-2">Takım Yönetimi</h6>
                                     <p class="text-muted small mb-0">
                                         Takım kadroları ve oyuncu transferleri
                                     </p>
@@ -146,12 +156,14 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="d-flex align-items-start">
+                            <div class="d-flex align-items-start p-3 rounded hover-lift" style="background: linear-gradient(135deg, #fef2f2 0%, #fff 100%);">
                                 <div class="flex-shrink-0">
-                                    <i class="bi bi-robot text-danger" style="font-size: 2rem;"></i>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-robot"></i>
+                                    </div>
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h6 class="fw-bold">AI Tahminleme</h6>
+                                    <h6 class="fw-bold mb-2">AI Tahminleme</h6>
                                     <p class="text-muted small mb-0">
                                         Makine öğrenmesi ile oyuncu potansiyel analizi
                                     </p>
@@ -160,12 +172,14 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="d-flex align-items-start">
+                            <div class="d-flex align-items-start p-3 rounded hover-lift" style="background: linear-gradient(135deg, #f8fafc 0%, #fff 100%);">
                                 <div class="flex-shrink-0">
-                                    <i class="bi bi-lock-fill text-secondary" style="font-size: 2rem;"></i>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-shield-lock-fill"></i>
+                                    </div>
                                 </div>
                                 <div class="flex-grow-1 ms-3">
-                                    <h6 class="fw-bold">Güvenlik</h6>
+                                    <h6 class="fw-bold mb-2">Güvenlik</h6>
                                     <p class="text-muted small mb-0">
                                         Rol bazlı erişim kontrolü ve veri güvenliği
                                     </p>
@@ -193,36 +207,36 @@
     {
         <div class="row mt-4">
             <div class="col-lg-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-bottom">
-                        <h5 class="mb-0">
-                            <i class="bi bi-lightning-fill text-warning"></i> Hızlı Erişim
+                <div class="card border-0 hover-lift">
+                    <div class="card-header text-white">
+                        <h5 class="mb-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-lightning-charge-fill"></i> Hızlı Erişim
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <div class="row text-center g-3">
-                            <div class="col-md-3">
-                                <a asp-controller="Player" asp-action="Create" class="btn btn-outline-success w-100 py-3">
-                                    <i class="bi bi-person-plus-fill d-block mb-2" style="font-size: 2rem;"></i>
-                                    Yeni Oyuncu Ekle
+                            <div class="col-lg-3 col-md-6">
+                                <a asp-controller="Player" asp-action="Create" class="btn btn-success w-100 py-4 hover-lift">
+                                    <i class="bi bi-person-plus-fill d-block mb-2" style="font-size: 2.5rem;"></i>
+                                    <span class="fw-bold">Yeni Oyuncu Ekle</span>
                                 </a>
                             </div>
-                            <div class="col-md-3">
-                                <a asp-controller="Teams" asp-action="Create" class="btn btn-outline-primary w-100 py-3">
-                                    <i class="bi bi-shield-plus d-block mb-2" style="font-size: 2rem;"></i>
-                                    Yeni Takım Ekle
+                            <div class="col-lg-3 col-md-6">
+                                <a asp-controller="Teams" asp-action="Create" class="btn btn-primary w-100 py-4 hover-lift">
+                                    <i class="bi bi-shield-plus d-block mb-2" style="font-size: 2.5rem;"></i>
+                                    <span class="fw-bold">Yeni Takım Ekle</span>
                                 </a>
                             </div>
-                            <div class="col-md-3">
-                                <a asp-controller="Player" asp-action="Index" class="btn btn-outline-info w-100 py-3">
-                                    <i class="bi bi-search d-block mb-2" style="font-size: 2rem;"></i>
-                                    Oyuncu Ara
+                            <div class="col-lg-3 col-md-6">
+                                <a asp-controller="Player" asp-action="Index" class="btn btn-info w-100 py-4 hover-lift">
+                                    <i class="bi bi-search d-block mb-2" style="font-size: 2.5rem;"></i>
+                                    <span class="fw-bold">Oyuncu Ara</span>
                                 </a>
                             </div>
-                            <div class="col-md-3">
-                                <a asp-controller="ScoutReport" asp-action="Index" class="btn btn-outline-warning w-100 py-3">
-                                    <i class="bi bi-file-earmark-text-fill d-block mb-2" style="font-size: 2rem;"></i>
-                                    Raporlarım
+                            <div class="col-lg-3 col-md-6">
+                                <a asp-controller="ScoutReport" asp-action="Index" class="btn btn-warning w-100 py-4 hover-lift">
+                                    <i class="bi bi-file-earmark-text-fill d-block mb-2" style="font-size: 2.5rem;"></i>
+                                    <span class="fw-bold">Raporlarım</span>
                                 </a>
                             </div>
                         </div>

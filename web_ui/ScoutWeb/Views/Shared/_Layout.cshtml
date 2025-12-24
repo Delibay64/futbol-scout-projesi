@@ -1,52 +1,65 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Modern Futbol Scout Yönetim Sistemi - Oyuncu ve Takım Takibi" />
     <title>@ViewData["Title"] - ScoutPro</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container-fluid">
-                <a class="navbar-brand text-warning fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-globe"></i> ScoutPro
+                <a class="navbar-brand text-warning d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-trophy-fill fs-4"></i>
+                    <span class="fw-bold">ScoutPro</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar"
+                        aria-expanded="false" aria-label="Menüyü Aç/Kapat">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+                            <a class="nav-link text-white" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door-fill"></i> Ana Sayfa
+                            </a>
                         </li>
-                        
+
                         <li class="nav-item">
-                            <a class="nav-link text-white" asp-controller="Player" asp-action="Index">Oyuncu Listesi</a>
+                            <a class="nav-link text-white" asp-controller="Player" asp-action="Index">
+                                <i class="bi bi-people-fill"></i> Oyuncu Listesi
+                            </a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-controller="Teams" asp-action="Index">
-                                <i class="bi bi-shield"></i> Takımlar
+                                <i class="bi bi-shield-fill"></i> Takımlar
                             </a>
                         </li>
 
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-controller="ScoutReport" asp-action="Index">
-                                <i class="bi bi-file-earmark-text"></i> Scout Raporları
+                                <i class="bi bi-file-text-fill"></i> Scout Raporları
                             </a>
                         </li>
 
                         @* Sadece "admin" kullanıcısı görebilir *@
                         @if (Context.Session.GetString("Username") == "admin")
                         {
-                            <li class="nav-item ms-3">
-                                <a class="nav-link btn btn-danger text-white px-3 fw-bold" asp-controller="Reports" asp-action="AdminDashboard">
-                                    <i class="bi bi-shield-lock"></i> Yönetici Paneli
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-controller="Reports" asp-action="AdminDashboard">
+                                    <i class="bi bi-shield-lock-fill"></i> Yönetici Paneli
                                 </a>
                             </li>
                         }
@@ -63,9 +76,12 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted mt-5">
+    <footer class="text-center">
         <div class="container">
-            &copy; 2025 - ScoutPro
+            <span>&copy; 2025 ScoutPro - Modern Futbol Scout Sistemi</span>
+            <span class="mx-2">|</span>
+            <i class="bi bi-heart-fill text-danger"></i>
+            <span class="mx-2">ile geliştirildi</span>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

@@ -5,16 +5,20 @@
 }
 
 <div class="container-fluid py-4">
-    <div class="row mb-4">
+    <div class="row mb-4 align-items-center">
         <div class="col-md-8">
-            <h2 class="text-primary">
-                <i class="bi bi-file-earmark-text"></i> Scout Raporlarım
+            <h2 class="mb-1">
+                <span class="gradient-text">
+                    <i class="bi bi-file-text-fill"></i> Scout Raporlarım
+                </span>
             </h2>
-            <p class="text-muted">Oluşturduğunuz oyuncu değerlendirme raporları</p>
+            <p class="text-muted mb-0">
+                <i class="bi bi-clipboard-data"></i> Oluşturduğunuz oyuncu değerlendirme raporları
+            </p>
         </div>
-        <div class="col-md-4 text-end">
-            <a asp-action="Create" class="btn btn-success btn-lg">
-                <i class="bi bi-plus-circle"></i> Yeni Rapor Oluştur
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a asp-action="Create" class="btn btn-success btn-lg hover-lift">
+                <i class="bi bi-file-earmark-plus"></i> Yeni Rapor Oluştur
             </a>
         </div>
     </div>

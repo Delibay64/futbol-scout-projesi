@@ -2,26 +2,26 @@
 
 @if (User.IsInRole("Admin"))
 {
-    <div class="card mb-3">
-        <div class="card-header bg-dark text-white">
-            <i class="bi bi-gear-fill"></i> Stored Procedure İşlemleri
+    <div class="card mb-4 border-0 shadow hover-lift">
+        <div class="card-header text-white">
+            <h6 class="mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-gear-fill"></i> Stored Procedure İşlemleri
+            </h6>
         </div>
-        <div class="card-body">
-            <form method="post" action="/Player/BulkUpdateValues" class="row g-3" onsubmit="return confirm('Tüm oyuncu değerlerini güncellemek istediğinizden emin misiniz?');">
+        <div class="card-body p-4">
+            <form method="post" action="/Player/BulkUpdateValues" class="row g-3 align-items-end" onsubmit="return confirm('Tüm oyuncu değerlerini güncellemek istediğinizden emin misiniz?');">
                 @Html.AntiForgeryToken()
-                <div class="col-auto">
-                    <label class="form-label">Toplu Değer Güncelleme (sp_UpdateValue):</label>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Toplu Değer Güncelleme (sp_UpdateValue):</label>
+                    <input type="number" name="percentage" class="form-control" value="10" min="-50" max="50" placeholder="Örn: 10 veya -5" />
+                    <small class="text-muted d-block mt-1">
+                        <i class="bi bi-info-circle"></i> Örn: 10 = %10 artış, -5 = %5 düşüş
+                    </small>
                 </div>
-                <div class="col-auto">
-                    <input type="number" name="percentage" class="form-control" value="10" min="-50" max="50" />
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-arrow-up-circle"></i> %Güncelle
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-warning w-100">
+                        <i class="bi bi-arrow-up-circle-fill"></i> Güncelle
                     </button>
-                </div>
-                <div class="col-auto">
-                    <small class="text-muted">Örn: 10 = %10 artış, -5 = %5 düşüş</small>
                 </div>
             </form>
         </div>
@@ -48,65 +48,91 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
         <div>
-            <h2 class="text-primary mb-0">🏆 Futbolcu Listesi</h2>
-            <p class="text-muted mb-0">Sistemdeki kayıtlı oyuncular</p>
+            <h2 class="mb-1">
+                <span class="gradient-text">
+                    <i class="bi bi-people-fill"></i> Futbolcu Listesi
+                </span>
+            </h2>
+            <p class="text-muted mb-0">
+                <i class="bi bi-database"></i> Sistemde kayıtlı @Model.Count() oyuncu bulunmaktadır
+            </p>
         </div>
-        <div>
-            <a asp-controller="Reports" asp-action="TopScorers" class="btn btn-warning text-dark fw-bold me-2">
-                <i class="bi bi-trophy-fill"></i> 🏆 Gol Krallığı
+        <div class="d-flex gap-2">
+            <a asp-controller="Reports" asp-action="TopScorers" class="btn btn-warning hover-lift">
+                <i class="bi bi-trophy-fill"></i> Gol Krallığı
             </a>
-            <a asp-action="Create" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Yeni Oyuncu
+            <a asp-action="Create" class="btn btn-primary hover-lift">
+                <i class="bi bi-person-plus-fill"></i> Yeni Oyuncu
             </a>
         </div>
     </div>
 
-    <div class="card shadow-sm mb-4 border-0">
-        <div class="card-body bg-light rounded">
+    <div class="card mb-4 border-0 shadow hover-lift">
+        <div class="card-body p-4">
             <form asp-controller="Player" asp-action="Index" method="get">
-                <div class="input-group">
+                <div class="input-group input-group-lg">
                     <span class="input-group-text bg-white border-end-0">
-                        <i class="bi bi-search text-muted"></i>
+                        <i class="bi bi-search"></i>
                     </span>
-                    <input type="text" name="searchString" class="form-control border-start-0" placeholder="Futbolcu adı, takım veya pozisyon ara...">
-                    <button class="btn btn-primary px-4" type="submit">Ara</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">Temizle</a>
+                    <input type="text" name="searchString" class="form-control border-start-0 border-end-0" placeholder="Futbolcu adı, takım veya pozisyon ara...">
+                    <button class="btn btn-primary px-5" type="submit">
+                        <i class="bi bi-search"></i> Ara
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg"></i> Temizle
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="table-responsive shadow-sm rounded">
-        <table class="table table-striped table-hover mb-0 align-middle">
-            <thead class="table-dark">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead>
                 <tr>
-                    <th>Ad Soyad</th>
-                    <th>Mevki</th>
-                    <th>Yaş</th>
-                    <th>Takım</th>
-                    <th>Piyasa Değeri (€)</th>
-                    <th class="text-end">İşlemler</th>
+                    <th><i class="bi bi-person-badge"></i> Ad Soyad</th>
+                    <th><i class="bi bi-award"></i> Mevki</th>
+                    <th><i class="bi bi-calendar-event"></i> Yaş</th>
+                    <th><i class="bi bi-shield"></i> Takım</th>
+                    <th><i class="bi bi-currency-euro"></i> Piyasa Değeri</th>
+                    <th class="text-end"><i class="bi bi-gear"></i> İşlemler</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td class="fw-bold">@item.FullName</td>
-                        <td><span class="badge bg-secondary">@item.Position</span></td>
+                        <td class="fw-bold">
+                            <i class="bi bi-person-circle text-primary me-2"></i>
+                            @item.FullName
+                        </td>
+                        <td><span class="badge bg-info">@item.Position</span></td>
                         <td>@item.Age</td>
-                        <td>@(item.Team != null ? item.Team.TeamName : "-")</td>
-                        <td class="text-success fw-bold">@String.Format("{0:N0}", item.CurrentMarketValue) €</td>
+                        <td>
+                            @if (item.Team != null)
+                            {
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-shield-fill"></i> @item.Team.TeamName
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">-</span>
+                            }
+                        </td>
+                        <td class="fw-bold" style="color: #11998e;">
+                            <i class="bi bi-cash-coin"></i> @String.Format("{0:N0}", item.CurrentMarketValue) €
+                        </td>
                         <td class="text-end">
                             <a asp-action="Details" asp-route-id="@item.PlayerId" class="btn btn-sm btn-info text-white me-1">
-                                <i class="bi bi-eye"></i> Detay
+                                <i class="bi bi-eye-fill"></i> Detay
                             </a>
                             <form asp-action="Delete" asp-route-id="@item.PlayerId" method="post" style="display:inline" onsubmit="return confirm('[@item.FullName] oyuncusunu silmek istediğinize emin misiniz?');">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-sm btn-danger">
-                                    <i class="bi bi-trash"></i> Sil
+                                    <i class="bi bi-trash-fill"></i> Sil
                                 </button>
                             </form>
                         </td>

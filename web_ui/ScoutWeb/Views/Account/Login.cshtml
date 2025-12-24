@@ -4,35 +4,66 @@
     ViewData["Title"] = "Giriş Yap";
 }
 
-<div class="container mt-5">
+<div class="container mt-5 py-5">
     <div class="row justify-content-center">
-        <div class="col-md-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white text-center">
-                    <h3>🔐 Giriş Yap</h3>
+        <div class="col-lg-5 col-md-7">
+            <div class="card border-0 shadow-lg hover-lift" style="border-radius: 20px; overflow: hidden;">
+                <div class="card-header text-white text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="mb-3">
+                        <i class="bi bi-shield-lock-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="mb-0 fw-bold">Giriş Yap</h3>
+                    <p class="mb-0 opacity-75">Scout Sistemi'ne Hoş Geldiniz</p>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-5">
                     <form asp-action="Login" method="post">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3"></div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Kullanıcı Adı</label>
-                            <input asp-for="Username" class="form-control" placeholder="Adınız" />
-                            <span asp-validation-for="Username" class="text-danger"></span>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-person-fill text-primary"></i> Kullanıcı Adı
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input asp-for="Username" class="form-control" placeholder="Kullanıcı adınızı girin" />
+                            </div>
+                            <span asp-validation-for="Username" class="text-danger small"></span>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Şifre</label>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="******" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="bi bi-key-fill text-primary"></i> Şifre
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="Şifrenizi girin" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger small"></span>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Giriş Yap
+                        </button>
                     </form>
                 </div>
-                <div class="card-footer text-center">
-                    <small>Hesabın yok mu? <a asp-controller="Account" asp-action="Register">Kayıt Ol</a></small>
+                <div class="card-footer text-center py-3" style="background: #f8f9fa;">
+                    <p class="mb-0">
+                        Hesabınız yok mu?
+                        <a asp-controller="Account" asp-action="Register" class="fw-bold text-decoration-none">
+                            Kayıt Ol <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </p>
                 </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a asp-controller="Home" asp-action="Index" class="text-muted text-decoration-none">
+                    <i class="bi bi-house-door"></i> Ana Sayfaya Dön
+                </a>
             </div>
         </div>
     </div>
